@@ -1,0 +1,81 @@
+h1. SHARC (Sharper Heuristic for Assignment of Robust Communities)
+
+This is the source code and simulation framework for the SHARC community
+assignment algorithm.
+
+h2. Community assignment
+
+The @assignment.pl@ file performs community assignment on static or dynamic
+networks using various distributed algorithm.
+
+<pre>
+assignment.pl [-h|--help] [-v|--verbose] [--version]
+    -n|--network network_file [-n|--network network_file_2 ...]
+    -a|--algorithm algorithm_name [-a|--algorithm algorithm_name ...]
+    [-l|--logpath path_to_log_dir] [-s|--seed n|n..m|n..m+k]
+
+    --help, -h          : Print this help, then exit
+    --version           : Print the script version, then exit
+    --verbose, -v       : Enable user information output to STDOUT
+
+    --network, -n       : Path to network description file. The kind of the
+                          network file is guessed and properly interpreted.
+                          Repeat option for several network files.
+    --algorithm, -a     : Name of the algorithm to execute. Repeat option
+                          for several algorithms.
+    --extra, -e         : Extra algorithm parameters. Can be of the form
+                          i)   parameter: set parameter to 1 (true)
+                          ii)  parameter=value: set parameter to value
+                          Repeat option multiple times to define several extra
+                          parameters. When same parameter is given multiple times,
+                          only the last entry is meaningful.
+    --metric, -m        : Metric used to evaluate the algorithm. Repeat option
+                          for several metrics.
+                          Available metrics: D (distribution), Q (modularity),
+                          NMI (normalized mutual information).
+    --logpath, -l       : path to save the generated log file (Default: ./log)
+    --seed, -s          : Value(s) of the seed used to initialize the random
+                          number generators. Can be of three forms :
+                          i)   n: number "n" is used
+                          ii)  n..m: all numbers between n and m (included)
+                               are used (leading to m-n simulations)
+                          iii) n..m+k : all numbers starting at n, incremented
+                               by k and lesser or equal to m are used
+
+    NOTE: if N networks, A algorithms and S seeds are specified, then the
+    script will be executed once for all the N*A*S unique configurations.
+</pre>
+
+The available alogrithms are @synchronous@, @asynchronous@, @leung@,
+@leungsync@ (synchronous version of the Leung algorithm), @ecdns@ (which is the
+name of SHARC, without dynamic networks-related enhancements).
+
+h2. Performance evaluation
+
+Performances of the various algorithms can be analyzed using the @analyzer.pl@
+script.
+
+<pre>
+analyzer.pl [-h|--help] [-v|--verbose] [--version]
+    -f|--files files_regex -d|--discriminant discriminant_name=index
+    [-t|--time] -m|--metric metric_name [-m|--metric metric_name ...]
+    [-a|--algorithm algorithm_name [-a|--algorithm algorithm_name ...]]
+    [-l|--logpath path_to_log_dir] [-o|--outpath path_to_out_dir]
+
+    --help, -h          : Print this help, then exit
+    --version           : Print the script version, then exit
+    --verbose, -v       : Enable user information output to STDOUT
+
+    --files, -f         : Regex defining the set of files to process.
+    --metric, -m        : Metric to analyze. Repeat option for several metrics.
+    --algorithm, -a     : Name of the algorithm to analyze. Repeat option
+                          for several algorithms.
+    --discriminant, -d  : Define the name and the index of the discriminant
+                          used to parse the results. Format should be
+                          discriminant_name=index
+    --time, -t          : Generate time (or iteration) based results for all
+                          selected metrics
+
+    --logpath, -l       : path to read the log files from (Default: ./log)
+    --outpath, -o       : path to save the generated data files (Default: ./out)
+</pre>

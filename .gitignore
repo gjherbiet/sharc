@@ -1,0 +1,13 @@
+# Scripts for code execution
+/*.pl
+/*.sh
+
+# Dummy output
+/*.txt
+
+# Except the main script and the analyzer
+!assignment.pl
+!analyzer.pl
+
+# Do not store generated netwoks
+nets/
