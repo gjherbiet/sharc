@@ -35,6 +35,7 @@ use warnings;
 use Getopt::Long;           # To easily retrieve arguments from command-line
 use Data::Dumper;           # To dump content of hashes and arrays in debug mode
 use Statistics::Descriptive;
+use Scalar::Util qw(looks_like_number);
 
 #-----------------------------------------------------------------------------
 
@@ -273,7 +274,17 @@ foreach my $m (@metrics) {
         die("Error in opening $outfile for writing: $!\n");
     
     my $header = 1;
-    foreach my $d (sort {$a <=> $b} keys %results) {
+    #
+    # Sort the discriminants differently if they are numeric or not
+    #
+    my @results_keys = keys %results;
+    if (looks_like_number($results_keys[0])) {
+        @results_keys = sort {$a <=> $b} @results_keys;
+    }
+    else {
+        @results_keys = @results_keys;
+    }
+    foreach my $d (@results_keys) {
         print DAT "# $discriminant" if ($header);
         my $str;
         foreach my $a (sort keys %{$results{$d}}) {
