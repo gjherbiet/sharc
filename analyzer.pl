@@ -152,7 +152,7 @@ FILE: foreach my $file (@files) {
         $discriminant_value = $parts[$d];
     }
     else {
-        $discriminant_value = $network;
+        $discriminant_value = $basename;
         $discriminant = "network";
     }
     $algorithms{$algorithm} = 1;
