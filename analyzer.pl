@@ -144,9 +144,16 @@ FILE: foreach my $file (@files) {
     # algorithm name and the seed
     #
     my ($network, $algorithm, $seed) = split("_", $file);
-    my @parts = split("-", $network);
-    die("Error: unable to identify $discriminant: index $d is too high") unless($parts[$d]);
-    my $discriminant_value = $parts[$d];
+    my $discriminant_value;
+    if ($discriminant && $d) {
+        my @parts = split("-", $network);
+        die("Error: unable to identify $discriminant: index $d is too high") unless($parts[$d]);
+        $discriminant_value = $parts[$d];
+    }
+    else {
+        $discriminant_value = $network;
+        $discriminant = "network";
+    }
     $algorithms{$algorithm} = 1;
     #verbose($discriminant_value);
 
