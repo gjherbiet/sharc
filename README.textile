@@ -79,3 +79,8 @@ analyzer.pl [-h|--help] [-v|--verbose] [--version]
     --logpath, -l       : path to read the log files from (Default: ./log)
     --outpath, -o       : path to save the generated data files (Default: ./out)
 </pre>
+
+h2. License
+
+This program is licensed under the "GPL v.3":http://www.gnu.org/licenses/
+license. See previous link or @gpl-3.0.texi@ for further details.
