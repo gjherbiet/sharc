@@ -267,9 +267,15 @@ FILE: foreach my $file (@files) {
 #
 verbose("Generating data files...");
 foreach my $m (@metrics) {
-    my $outfile = $outpath."/".$basename."_".$discriminant."_".$m.".dat";
+    my $outfile;
+    if ($discriminant eq "network") {
+        $outfile = $outpath."/".$basename."_".$m.".dat";
+    }
+    else {
+        $outfile = $outpath."/".$basename."_".$discriminant."_".$m.".dat";
+    }
     
-    verbose("Generating $outfile");
+    verbose("> Generating $outfile");
     open (DAT, ">", $outfile) or
         die("Error in opening $outfile for writing: $!\n");
     
@@ -308,11 +314,22 @@ foreach my $m (@metrics) {
 #
 verbose("Generating gnuplot command files...");
 foreach my $m (@metrics) {
-    my $pltfile = $outpath."/".$basename."_".$discriminant."_".$m.".plt";
-    my $outfile = $outpath."/".$basename."_".$discriminant."_".$m.".eps";
-    my $datfile = $outpath."/".$basename."_".$discriminant."_".$m.".dat";
+    my $pltfile;
+    my $outfile;
+    my $datfile;
+    if ($discriminant eq "network") {
+        $pltfile = $outpath."/".$basename."_".$m.".plt";
+        $outfile = $outpath."/".$basename."_".$m.".eps";
+        $datfile = $outpath."/".$basename."_".$m.".dat";
+    }
+    else {
+        $pltfile = $outpath."/".$basename."_".$discriminant."_".$m.".plt";
+        $outfile = $outpath."/".$basename."_".$discriminant."_".$m.".eps";
+        $datfile = $outpath."/".$basename."_".$discriminant."_".$m.".dat";
+    }
     
-    verbose("Generating $pltfile");
+    
+    verbose("> Generating $pltfile");
     open (PLT, ">", $pltfile) or
         die("Error in opening $pltfile for writing: $!\n");
     
@@ -360,6 +377,155 @@ EOF
         $i++;
     }
     close(PLT);
+}
+
+exit(0) unless($time_based);
+
+#
+# Generate time-based data files
+#
+verbose("Generating time-based data files...");
+foreach my $m (@metrics) {
+    
+    #
+    # Skip metrics that don't support time-based results
+    #
+    next if ($m eq "T" || $m eq "N");
+    
+    #
+    # For all other metrics:
+    # create a separated time-based data file for each determinant value
+    #
+    foreach my $d (keys %results) {
+        my $outfile;
+        if ($discriminant eq "network") {
+            $outfile = $outpath."/".$basename."_".$m.".dat";
+        }
+        else {
+            $outfile = $outpath."/".$basename."_".$discriminant."-".$d."_".$m.".dat";
+        }
+        
+        verbose("> Generating $outfile");
+        open (DAT, ">", $outfile) or
+            die("Error in opening $outfile for writing: $!\n");
+        
+        #
+        # Get the maximum number of iterations on all algorithms for this metric
+        #
+        my $max_iter = 0;
+        foreach my $a (sort keys %{$results{$d}}) {
+            $max_iter = (scalar @{$results{$d}{$a}{$m}{time}})
+                if ($max_iter < (scalar @{$results{$d}{$a}{$m}{time}}));
+        }
+        
+        #
+        # Print statistical data for each algorithms for each iteration
+        #
+        my $header = 1;
+        for (my $i=0; $i<$max_iter; $i++) {
+            print DAT "# $discriminant=$d" if ($header);
+            my $str;
+            foreach my $a (sort keys %{$results{$d}}) {
+                if ($header) {
+                    print DAT " $a";
+                }
+                foreach my $f ("mean", "standard_deviation", "min", "max") {
+                    if (exists($results{$d}{$a}{$m}{time}[$i])){
+                        $str .= " ".$results{$d}{$a}{$m}{time}[$i]->$f();
+                    }
+                    else {
+                        $str .= " ";
+                    }
+                }
+            }
+            print DAT "\n$i $str\n";
+            $header = 0 if ($header);
+        }
+        close(DAT);
+    }
+}
+
+#
+# Generate the time-based plot files
+#
+verbose("Generating time-based gnuplot command files...");
+foreach my $m (@metrics) {
+    
+    #
+    # Skip metrics that don't support time-based results
+    #
+    next if ($m eq "T" || $m eq "N");
+    
+    #
+    # For all other metrics:
+    # create a separated time-based data file for each determinant value
+    #
+    foreach my $d (keys %results) {
+    
+        my $pltfile;
+        my $outfile;
+        my $datfile;
+        if ($discriminant eq "network") {
+            $pltfile = $outpath."/".$basename."_".$m.".plt";
+            $outfile = $outpath."/".$basename."_".$m.".eps";
+            $datfile = $outpath."/".$basename."_".$m.".dat";
+        }
+        else {
+            $pltfile = $outpath."/".$basename."_".$discriminant."-".$d."_".$m.".plt";
+            $outfile = $outpath."/".$basename."_".$discriminant."-".$d."_".$m.".eps";
+            $datfile = $outpath."/".$basename."_".$discriminant."-".$d."_".$m.".dat";
+        }
+    
+    
+        verbose("> Generating $pltfile");
+        open (PLT, ">", $pltfile) or
+            die("Error in opening $pltfile for writing: $!\n");
+    
+        my $key_position;
+        if ($m eq "S") {
+            $key_position = "bottom right";
+        }
+        else {
+            $key_position = "top right";
+        }
+
+        print PLT <<EOF;
+set title 'Evolution of $metrics_functions{$m} for test \"$basename\"'
+set xlabel 'iterations'
+set ylabel '$metrics_functions{$m}'
+
+set terminal postscript enhanced eps color "Times-Roman" 18
+set output '$outfile'
+
+set key $key_position
+set grid
+
+set style line 1 lt 1 lc rgb "orange" lw 4 pt 1
+set style line 2 lt 4 lc rgb "orange" lw 2 pt 1
+set style line 3 lt 1 lc rgb "red" lw 4 pt 3
+set style line 4 lt 4 lc rgb "red" lw 2 pt 3
+set style line 5 lt 1 lc rgb "blue" lw 4 pt 5
+set style line 6 lt 4 lc rgb "blue" lw 2 pt 5
+set style line 7 lt 1 lc rgb "violet" lw 4 pt 6
+set style line 8 lt 4 lc rgb "violet" lw 2 pt 6
+set style line 9 lt 1 lc rgb "green" lw 4 pt 9
+set style line 10 lt 4 lc rgb "green" lw 2 pt 9
+
+plot \\
+EOF
+
+        my $i=0;
+        foreach my $a (sort keys %algorithms) {
+            print PLT "\t'$datfile' using 1:".(4*$i+2)." with lines ls ".(2*$i+1)." notitle, \\\n";
+            print PLT "\t'$datfile' using 1:".(4*$i+2).":".(4*$i+3)." with errorbars ls ".(2*$i+1)." title '$a', \\\n";
+            print PLT "\t'$datfile' using 1:".(4*$i+4)." with lines ls ".(2*$i+2)." notitle, \\\n";
+            print PLT "\t'$datfile' using 1:".(4*$i+5)." with lines ls ".(2*$i+2)." notitle";
+            print PLT ", \\" if ($i+1 < (scalar keys %algorithms));
+            print PLT "\n";
+            $i++;
+        }
+        close(PLT);
+    }
 }
 
 #-----------------------------------------------------------------------------
