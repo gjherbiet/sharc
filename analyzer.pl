@@ -354,7 +354,10 @@ EOF
 # Set the metrics
 #
 sub set_metrics {
-    if ( !grep(/^$_[0]$/, @metrics) && exists($metrics_functions{$_[0]})) {
+    if ($_[0] eq "all") {
+        push(@metrics, (keys %metrics_functions));
+    }
+    elsif ( !grep(/^$_[0]$/, @metrics) && exists($metrics_functions{$_[0]})) {
         push(@metrics, $_[0]);
     }
 }
@@ -392,7 +395,8 @@ $COMMAND [-h|--help] [-v|--verbose] [--version]
     --verbose, -v       : Enable user information output to STDOUT
 
     --files, -f         : Regex defining the set of files to process.
-    --metric, -m        : Metric to analyze. Repeat option for several metrics.
+    --metric, -m        : Metric to analyze. Repeat option for several metrics
+                          or use "all" value to select all metrics at once.
     --discriminant, -d  : Define the name and the index of the discriminant
                           used to parse the results. Format should be
                           discriminant_name=index
