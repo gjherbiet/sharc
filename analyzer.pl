@@ -61,7 +61,6 @@ my %OPTIONS;
 #my @networks;          # List of network source files
 my $files_regex;        # Regex to select files to parse
 my @metrics = ();       # List of metrics to analyze
-my @algos = ();         # List of algorithms to analyze
 my $logpath = "log";    # Input directory for the simulation results
 my $outpath = "out";    # Output directory for the generated statistics
 my $discriminant;       # Name of the discriminant used
@@ -100,7 +99,6 @@ my $res = GetOptions(
     'version'           => sub { VERSION_MESSAGE(); exit(0); },
 
     'files|f=s'         => \$files_regex,
-    'algorithm|a=s'     => sub { set_algos( $_[1] ) },
     'metric|m=s'        => sub { set_metrics( $_[1] ) },
     'discriminant|d=s'  => sub { set_discriminant( $_[1] ) },
     'time|t+'           => \$time_based,
@@ -353,15 +351,6 @@ EOF
 #
 
 #
-# Set the algorithm
-#
-sub set_algos {
-    if ( !grep(/^$_[0]$/, @algos)) {
-        push (@algos, $_[0]);
-    }
-}
-
-#
 # Set the metrics
 #
 sub set_metrics {
@@ -404,8 +393,6 @@ $COMMAND [-h|--help] [-v|--verbose] [--version]
 
     --files, -f         : Regex defining the set of files to process.
     --metric, -m        : Metric to analyze. Repeat option for several metrics.
-    --algorithm, -a     : Name of the algorithm to analyze. Repeat option
-                          for several algorithms.
     --discriminant, -d  : Define the name and the index of the discriminant
                           used to parse the results. Format should be
                           discriminant_name=index
