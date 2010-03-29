@@ -392,9 +392,8 @@ sub USAGE {
     
     print <<EOF;
 $COMMAND [-h|--help] [-v|--verbose] [--version]
-    -f|--files files_regex -d|--discriminant discriminant_name=index
+    -f|--files files_regex [-d|--discriminant discriminant_name=index]
     [-t|--time] -m|--metric metric_name [-m|--metric metric_name ...]
-    [-a|--algorithm algorithm_name [-a|--algorithm algorithm_name ...]]
     [-l|--logpath path_to_log_dir] [-o|--outpath path_to_out_dir]
     
     --help, -h          : Print this help, then exit
@@ -406,7 +405,8 @@ $COMMAND [-h|--help] [-v|--verbose] [--version]
                           or use "all" value to select all metrics at once.
     --discriminant, -d  : Define the name and the index of the discriminant
                           used to parse the results. Format should be
-                          discriminant_name=index
+                          discriminant_name=index.
+                          (Default: complete network name).
     --time, -t          : Generate time (or iteration) based results for all
                           selected metrics
     
