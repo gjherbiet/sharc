@@ -18,45 +18,59 @@
 		</dict>
 	</array>
 	<key>fileHierarchyDrawerWidth</key>
-	<integer>232</integer>
+	<integer>210</integer>
 	<key>metaData</key>
 	<dict>
+		<key>README.textile</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>7</integer>
+				<key>line</key>
+				<integer>55</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>24</integer>
+		</dict>
 		<key>assignment.pl</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>40</integer>
+				<integer>21</integer>
 				<key>line</key>
 				<integer>213</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>103</integer>
+			<integer>346</integer>
 		</dict>
-		<key>dynamic.pl</key>
+		<key>classic.pl</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>73</integer>
+				<integer>26</integer>
 				<key>line</key>
-				<integer>27</integer>
+				<integer>19</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
-		<key>dynamic8.pl</key>
+		<key>dynamic.pl</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
 				<integer>0</integer>
 				<key>line</key>
-				<integer>38</integer>
+				<integer>16</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
@@ -83,7 +97,8 @@
 		<string>rename.pl</string>
 		<string>dynamic.pl</string>
 		<string>assignment.pl</string>
-		<string>dynamic8.pl</string>
+		<string>README.textile</string>
+		<string>classic.pl</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<false/>
@@ -100,6 +115,6 @@
 		</dict>
 	</dict>
 	<key>windowFrame</key>
-	<string>{{0, 72}, {960, 1106}}</string>
+	<string>{{0, 72}, {960, 986}}</string>
 </dict>
 </plist>

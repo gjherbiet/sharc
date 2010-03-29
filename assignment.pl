@@ -270,7 +270,7 @@ sub termination_condition {
         #
         #print "static termination condition\n";
         #print "ref=$ref, prev_ref=$prev_ref, step=$step\n";
-        return !(($step == 0 || $ref eq "-0" || abs($prev_ref - $ref) > 10**(-5) ) && $step <= 50);
+        return !(($step == 0 || $ref eq "-0" || abs($prev_ref - $ref) > 10**(-4) ) && $step <= 50);
     }
 }
 
