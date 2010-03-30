@@ -72,6 +72,10 @@ my @metrics = ("NMI");  # List of metrics to compute
 my $logpath = "log";    # Output directory for the simulation results
 my @extra;              # List of extra arguments passed to the algorithm
 
+my $rand_k;             # Average degree for random graphs
+my $rand_N;             # Number of nodes for random graphs
+my $rand_s;             # Seed for random graphs
+
 my %metrics_functions = (
     "Q"     => "modularity",
     "NMI"   => "nmi",
@@ -94,6 +98,7 @@ my $res = GetOptions(
     'version'       => sub { VERSION_MESSAGE(); exit(0); },
 
     'network|n=s'   => \@networks,
+    'rand|r=s'      => sub { set_random( $_[1] ) },
     'algorithm|a=s' => sub { set_algos( $_[1] ) },
     'metric|m=s'    => sub { set_metrics( $_[1] ) },
     'logpath|l=s'   => \$logpath,
@@ -115,13 +120,38 @@ unless ( $res && ( scalar @networks ) > 0 && ( scalar @algos ) > 0 ) {
 #
 foreach my $network (@networks) {
     
-    verbose("Generating network from input file $network.");
-    
     #
     # Generate the original network (will be copied for each different configuration)
     # and get the maximum steps to execute (undef if static network)
     #
-    my ($G0, $max_steps, $network_name) = parse($network);
+    my $G0;
+    my $max_steps;
+    my $network_name;
+
+    #
+    # Random network case
+    #
+    if ($rand_N) {
+        verbose("Generating random network with parameters $rand_N, $rand_k, $network");
+
+        my @nodes = (1..$rand_N);
+        my $edges = $rand_k / $rand_N;
+
+        $G0 = Graph::Undirected->new;
+        $G0 = Graph->random_graph(
+                    vertices => \@nodes,
+                    edges_fill => $edges,
+                    random_seed => $network);
+        
+        $network_name = "er-".$rand_N."-".$rand_k."-".$network;
+    }
+    #
+    # File case
+    #
+    else {
+        verbose("Generating network from input file $network.");
+        ($G0, $max_steps, $network_name) = parse($network);
+    }
 
     foreach my $algo (@algos) {
         
@@ -330,6 +360,21 @@ sub set_extra_parameters {
     }
 }
 
+#
+# Set random graph
+#
+sub set_random {
+    ($rand_N, $rand_k, $rand_s) = split(',', $_[0], 3);
+    unless ($rand_N && $rand_k && $rand_s) {
+        print "Error in random network definition.\n";
+        print "Please use \"-r nodes,edge_proba,runs\".";
+        exit 1;
+    }
+    else {
+        @networks = (0..($rand_s-1));
+    }
+}
+
 
 #
 # Usage function
@@ -353,6 +398,11 @@ $COMMAND [-h|--help] [-v|--verbose] [--version]
     --network, -n       : Path to network description file. The kind of the
                           network file is guessed and properly interpreted.
                           Repeat option for several network files.
+    --rand, -r          : Generate n Erdös-Rényi undirected random graphs with
+                          N nodes, and average degree of k.
+                          The agrument for should be "-r N,k,s"
+                          NOTE: when this option is active, any -n options
+                          are not parsed.
     --algorithm, -a     : Name of the algorithm to execute. Repeat option
                           for several algorithms.
     --extra, -e         : Extra algorithm parameters. Can be of the form
