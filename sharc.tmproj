@@ -18,36 +18,52 @@
 		</dict>
 	</array>
 	<key>fileHierarchyDrawerWidth</key>
-	<integer>210</integer>
+	<integer>185</integer>
 	<key>metaData</key>
 	<dict>
-		<key>README.textile</key>
+		<key>analyzer.pl</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>7</integer>
+				<integer>78</integer>
 				<key>line</key>
-				<integer>55</integer>
+				<integer>27</integer>
 			</dict>
+			<key>columnSelection</key>
+			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>24</integer>
+			<integer>0</integer>
+			<key>selectFrom</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>2</integer>
+			</dict>
+			<key>selectTo</key>
+			<dict>
+				<key>column</key>
+				<integer>78</integer>
+				<key>line</key>
+				<integer>27</integer>
+			</dict>
 		</dict>
 		<key>assignment.pl</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>21</integer>
+				<integer>0</integer>
 				<key>line</key>
-				<integer>213</integer>
+				<integer>209</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>346</integer>
+			<integer>338</integer>
 		</dict>
 		<key>classic.pl</key>
 		<dict>
@@ -94,11 +110,8 @@
 	</dict>
 	<key>openDocuments</key>
 	<array>
-		<string>rename.pl</string>
-		<string>dynamic.pl</string>
+		<string>analyzer.pl</string>
 		<string>assignment.pl</string>
-		<string>README.textile</string>
-		<string>classic.pl</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<false/>
@@ -115,6 +128,6 @@
 		</dict>
 	</dict>
 	<key>windowFrame</key>
-	<string>{{0, 72}, {960, 986}}</string>
+	<string>{{0, 72}, {960, 1106}}</string>
 </dict>
 </plist>

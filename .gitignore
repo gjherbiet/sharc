@@ -9,5 +9,8 @@
 !assignment.pl
 !analyzer.pl
 
+# Except the cleaner also
+!log-cleaner.sh
+
 # Do not store generated netwoks
 nets/
