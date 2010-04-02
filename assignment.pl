@@ -100,7 +100,7 @@ my $res = GetOptions(
     'network|n=s'   => \@networks,
     'rand|r=s'      => sub { set_random( $_[1] ) },
     'algorithm|a=s' => sub { set_algos( $_[1] ) },
-    'stability|s=s' => \$stability,
+    'stability=s'   => \$stability,
     'metric|m=s'    => sub { set_metrics( $_[1] ) },
     'logpath|l=s'   => \$logpath,
     'seed|s=s'      => sub { set_seeds( $_[1] ) },
