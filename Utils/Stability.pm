@@ -58,6 +58,7 @@ sub age {
         my ($u, $v) = @{$endpoints};
         if ($G->has_edge_attribute($u, $v, "ae")) {
             my $weight = $parameters{step} - $G->get_edge_attribute($u, $v, "ae");
+            #print "$parameters{step} $u $v $weight\n" if ($u == 34 && $v == 83);
             $G->set_edge_weight($u, $v, $weight);
         }
     }
@@ -84,12 +85,15 @@ sub quality {
         if ($G->has_vertex_attribute($u, "x") && $G->has_vertex_attribute($u, "y") &&
             $G->has_vertex_attribute($v, "x") && $G->has_vertex_attribute($v, "y")) {
                 
-            my $xx = $G->has_vertex_attribute($u, "x") - $G->has_vertex_attribute($v, "x");
-            my $yy = $G->has_vertex_attribute($u, "y") - $G->has_vertex_attribute($v, "y");
+            my $xx = $G->get_vertex_attribute($u, "x") - $G->get_vertex_attribute($v, "x");
+            my $yy = $G->get_vertex_attribute($u, "y") - $G->get_vertex_attribute($v, "y");
             my $dist = sqrt( $xx**2 + $yy**2 );
-
-            my $weight = 1 / ($dist ** $alpha);
-            $G->set_edge_weight($u, $v, $weight);
+            
+            if ($dist > 0) {
+                #print "$parameters{step} $u $v $xx $yy $dist $alpha\n" if ($u == 61 && $v == 78);
+                my $weight = 1 / ($dist ** $alpha);
+                $G->set_edge_weight($u, $v, $weight);
+            }
         }
     }
 }
