@@ -62,3 +62,22 @@ sub set_node_community {
     
     $G->set_vertex_attribute($n, $community_field, $c);
 }
+
+sub get_distance_to_originator {
+    my $G = shift;
+    my $n = shift;
+    my %parameters = @_;
+    
+    my $od_field = exists($parameters{originator_distance_field}) ?
+        $parameters{originator_distance_field} : "originator_distance";
+    
+    if ($G->has_vertex_attribute($n, $od_field)) {
+        return $G->get_vertex_attribute($n, $od_field);
+    }
+    elsif (get_node_community($G, $n, %parameters) == $n){
+        return 0;
+    }
+    else {
+        die("Error: unknown distance to originator.\n");
+    }
+}
