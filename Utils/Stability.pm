@@ -50,11 +50,12 @@ sub age {
             Please use \"age(\$G, step => \$step)\".\n");
     }
     
-    foreach my ($u, $v) ($G->edges) {
+    foreach my $endpoints ($G->edges) {
         #
         # Update the weight by comparing to the step it has been created
         # only if this latter information exists
         #
+        my ($u, $v) = @{$endpoints};
         if ($G->has_edge_attribute($u, $v, "ae")) {
             my $weight = $parameters{step} - $G->get_edge_attribute($u, $v, "ae");
             $G->set_edge_weight($u, $v, $weight);
@@ -74,11 +75,12 @@ sub quality {
     my $alpha = 2;
     $alpha = $parameters{alpha} if (exists($parameters{alpha}));
     
-    foreach my ($u, $v) ($G->edges) {
+    foreach my $endpoints ($G->edges) {
         #
         # Update the weight based on the endpoints position if this information
         # exists
         #
+        my ($u, $v) = @{$endpoints};
         if ($G->has_vertex_attribute($u, "x") && $G->has_vertex_attribute($u, "y") &&
             $G->has_vertex_attribute($v, "x") && $G->has_vertex_attribute($v, "y")) {
                 
