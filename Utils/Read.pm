@@ -202,7 +202,7 @@ sub parse_gml {
                 }
                 if ( !$G->has_vertex($target) ) {
                     #print "   Added node $target.";
-                    $G->add_vertes( $target, label => "N$target" );
+                    $G->add_vertex( $target, label => "N$target" );
                 }
                 if ( !$G->has_edge( $source, $target ) ) {
                     if ( $value ne "undef" ) {
@@ -212,11 +212,13 @@ sub parse_gml {
                     else {
                         $G->add_weighted_edge( $source, $target, 1 );
                     }
+                    $G->set_edge_attribute($source, $target, "ae", 0);
                 }
                 else {
                     if ( $value ne "undef" ) {
                         #print "  Value = $value.  Added new weight to existing weight.";
                         $G->add_weighted_edge( $source, $target, $value );
+                        $G->set_edge_attribute($source, $target, "ae", 0);
                     }
                 }
                 #print "\n";
@@ -279,6 +281,7 @@ sub parse_lfr {
                 $G->add_weighted_edge( $1, $2, 1 );
                 #print " Weight set to 1";
             }
+            $G->set_edge_attribute($1, $2, "ae", 0);
             #print "\n";
         }
     }
@@ -401,6 +404,7 @@ sub _parse_dgs_v12 {
             elsif (/^(a|c)e "(.*)" "(\d+)" "(\d+)"$/) {
                 #print "$1 $2 $3 $4\n";
                 $G->add_weighted_edge(($3+1), ($4+1), 1) if ($1 eq "a");
+                $G->set_edge_attribute(($3+1), ($4+1), "ae", $step);
                 $G->set_edge_attribute(($3+1), ($4+1), "name", $2);
             }
             #de "59:85:ieee802.11b"
