@@ -34,14 +34,13 @@ use warnings;
 #
 use Getopt::Long;           # To easily retrieve arguments from command-line
 #use Data::Dumper;           # To dump content of hashes and arrays in debug mode
-#use Pod::Usage;             # Create a usage function from POD documentation
 use Time::HiRes;            # High resoltion for time measurement
-#use POSIX qw(strftime);     # To format time
 use Graph;                  # Graph management library
 
 use Utils::Read;            # Read graphs from various formats
-use Community::Algorithms;
-use Community::Metrics;
+use Community::Algorithms;  # Community algorithms
+use Community::Metrics;     # Community metrics
+use Utils::Stability;       # Stability metrics
 
 #-----------------------------------------------------------------------------
 
@@ -69,6 +68,7 @@ my @networks;           # List of network source files
 my @seeds = (0);        # List of seeds used for RNG initialization
 my @algos;              # List of algorithms to use
 my @metrics = ("NMI");  # List of metrics to compute
+my $stability;          # Stability criterion to use
 my $logpath = "log";    # Output directory for the simulation results
 my @extra;              # List of extra arguments passed to the algorithm
 
@@ -100,6 +100,7 @@ my $res = GetOptions(
     'network|n=s'   => \@networks,
     'rand|r=s'      => sub { set_random( $_[1] ) },
     'algorithm|a=s' => sub { set_algos( $_[1] ) },
+    'stability|s=s' => \$stability,
     'metric|m=s'    => sub { set_metrics( $_[1] ) },
     'logpath|l=s'   => \$logpath,
     'seed|s=s'      => sub { set_seeds( $_[1] ) },
@@ -225,6 +226,15 @@ foreach my $network (@networks) {
                 # Update some potentially required parameters for the algorithm
                 #
                 $parameters{step} = $step;
+                
+                #
+                # Update the link weights if a particular stability
+                # metric is chosen
+                #
+                if ($stability && defined(&{$stability})) {
+                    no strict 'refs';
+                    &{$stability}($G, %parameters);
+                }
                 
                 #
                 # Execute the chosen algorithm
@@ -389,6 +399,8 @@ sub USAGE {
 $COMMAND [-h|--help] [-v|--verbose] [--version]
     -n|--network network_file [-n|--network network_file_2 ...]
     -a|--algorithm algorithm_name [-a|--algorithm algorithm_name ...]
+    [-e|--extra parameter[=value] [-e|--extra parameter[=value] ...]]
+    [-s|--stability criterion] [-m|--metrics MET [-m|--metrics MET ...]]
     [-l|--logpath path_to_log_dir] [-s|--seed n|n..m|n..m+k]
     
     --help, -h          : Print this help, then exit
@@ -411,6 +423,8 @@ $COMMAND [-h|--help] [-v|--verbose] [--version]
                           Repeat option multiple times to define several extra
                           parameters. When same parameter is given multiple times,
                           only the last entry is meaningful.
+    --stability, -s     : Stability criterion to use as link weight in weighted
+                          networks. This is updated at each iteration step
     --metric, -m        : Metric used to evaluate the algorithm. Repeat option
                           for several metrics.
                           Available metrics: D (distribution), Q (modularity),
