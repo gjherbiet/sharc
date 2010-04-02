@@ -63,7 +63,7 @@ sub set_node_community {
     $G->set_vertex_attribute($n, $community_field, $c);
 }
 
-sub get_distance_to_originator {
+sub get_originator_distance {
     my $G = shift;
     my $n = shift;
     my %parameters = @_;
