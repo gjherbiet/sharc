@@ -81,3 +81,15 @@ sub get_originator_distance {
         die("Error: unknown distance to originator.\n");
     }
 }
+
+sub set_originator_distance {
+    my $G = shift;
+    my $n = shift;
+    my $d = shift;
+    my %parameters = @_;
+    
+    my $od_field = exists($parameters{originator_distance_field}) ?
+        $parameters{originator_distance_field} : "originator_distance";
+    
+    $G->set_vertex_attribute($n, $od_field, $d);
+}
