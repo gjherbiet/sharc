@@ -514,13 +514,14 @@ sub sharc_node {
     #
     # Get the current node neighbors
     #
-    @neighbors = $G->neighbours($n);
+    my @neighbors = $G->neighbours($n);
     
     #
     # If the node has no neighbors, simply set myself back to self-community
     #
     if (scalar @neighbors == 0 && !$updated) {
         set_node_community($G, $n, $n, %parameters);
+        print "== Node $n enters self-community.\n";
         $updated = 1;
     }
     
@@ -536,6 +537,7 @@ sub sharc_node {
         
         my $bl = $G->get_vertex_attribute($n, "broken_lifetime");
         $G->set_vertex_attribute($n, "broken_lifetime", ($bl -1));
+        print "== Node $n remains in break mode (".($G->get_vertex_attribute($n, "broken_lifetime"))." remaining).\n";
         $updated = 1;
     }
     #
@@ -550,7 +552,6 @@ sub sharc_node {
     # Now, perform operations on the neighbors to see if I shall enter
     # neighbor break, a new break mode or simply apply ECDNS
     #
-    
     my $originator_distance;
     my $freshness_counter;
     
@@ -568,6 +569,7 @@ sub sharc_node {
                 get_node_community($G, $n, %parameters));
             $G->set_vertex_attribute($n, "broken_lifetime", $broken_lifetime);
             set_node_community($G, $n, get_node_community($G, $nb, %parameters), %parameters);
+            print "== Node $n enters neighbor break due to neighbor $nb\n";
             $updated = 1;
         }
         
@@ -577,15 +579,17 @@ sub sharc_node {
         if (get_node_community($G, $n, %parameters) == get_node_community($G, $nb, %parameters) &&
             (!$originator_distance || $originator_distance < get_originator_distance($G, $nb, %parameters))) {
             $originator_distance = get_originator_distance($G, $nb, %parameters);
+            print "== Node $n is now ".($originator_distance+ 1 )." from ".(get_node_community($G, $n, %parameters))."due to neighbor $nb\n";
         }
         
         #
         # Update the freshness counter
         #
         if (get_node_community($G, $n, %parameters) == get_node_community($G, $nb, %parameters) &&
-            $G->has_vertex_attribute($nb, "freshness_counter")
+            $G->has_vertex_attribute($nb, "freshness_counter") && 
             (!$freshness_counter || $freshness_counter < $G->get_vertex_attribute($nb, "freshness_counter"))) {
             $freshness_counter = $G->get_vertex_attribute($nb, "freshness_counter");
+            print "== Node $n sets freshness counter to $freshness_counter due to neighbor $nb\n";
         }
     }
     
@@ -598,9 +602,11 @@ sub sharc_node {
         $nf_st = $G->get_vertex_attribute($n, "non_fresh_steps")
             if ($G->has_vertex_attribute($n, "non_fresh_steps"));
         $G->set_vertex_attribute($n, "non_fresh_steps", ($nf_st + 1));
+        print "== Node $n increases non fresh steps to ".($nf_st + 1)."\n";
     }
     else {
         $G->set_vertex_attribute($n, "non_fresh_steps", 0);
+        print "== Node $n resets non fresh steps to 0\n";
     }
     
     #
@@ -614,6 +620,7 @@ sub sharc_node {
             get_node_community($G, $n, %parameters));
         $G->set_vertex_attribute($n, "broken_lifetime", $broken_lifetime);
         set_node_community($G, $n, $n, %parameters);
+        print "== Node $n enters break mode\n";
         $updated = 1;
     }
     
@@ -621,14 +628,9 @@ sub sharc_node {
     # If still not updated, apply "simple" ECDNS
     #
     unless ($updated) {
+        print "== Node $n performs simple ECDNS\n";
         ecdns_node($G, $n, %parameters);
-    }
-    
-    #
-    # If still not updated, apply "simple" ECDNS
-    #
-    unless ($updated) {
-        ecdns_node($G, $n, %parameters);
+        $updated = 1;
     }
     
     #
@@ -643,6 +645,7 @@ sub sharc_node {
         $oc = $G->get_vertex_attribute($G, $n, "originator_counter") + 1
             if ($G->has_vertex_attribute($G, $n, "originator_counter"));
         $G->set_vertex_attribute($G, $n, "freshness_counter", $oc);
+        print "== Node $n is self-community, distance to originator is 0, freshness is ".($oc)."\n";
     }
     else {
         my $od;
@@ -655,15 +658,17 @@ sub sharc_node {
             if (get_node_community($G, $n, %parameters) == get_node_community($G, $nb, %parameters) &&
                 (!$od || $od < get_originator_distance($G, $nb, %parameters))) {
                 $od = get_originator_distance($G, $nb, %parameters);
+                print "== Node $n is now ".($od + 1)." from ".(get_node_community($G, $n, %parameters))."due to neighbor $nb\n";
             }
             
             #
             # Update the freshness counter
             #
             if (get_node_community($G, $n, %parameters) == get_node_community($G, $nb, %parameters) &&
-                $G->has_vertex_attribute($nb, "freshness_counter")
+                $G->has_vertex_attribute($nb, "freshness_counter") &&
                 (!$fc || $fc < $G->get_vertex_attribute($nb, "freshness_counter"))) {
                 $fc = $G->get_vertex_attribute($nb, "freshness_counter");
+                print "== Node $n sets freshness counter to $fc due to neighbor $nb\n";
             }
         }
         set_originator_distance($G, $n, ($od+1), %parameters);
