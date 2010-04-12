@@ -35,7 +35,7 @@ use List::Util 'shuffle';
 use Community::Misc;
 
 our $VERSION = '0.1';
-our @EXPORT  = qw(dummy asynchronous synchronous leung leungsync ecdns);
+our @EXPORT  = qw(dummy asynchronous synchronous leung leungsync ecdns sharc);
 
 #-----------------------------------------------------------------------------
 # Dummy algorithm, for testing purposes
@@ -553,6 +553,8 @@ sub sharc_node {
     # neighbor break, a new break mode or simply apply ECDNS
     #
     my $originator_distance;
+    $originator_distance = 0 if (get_node_community($G, $n, %parameters) == $n);
+    
     my $freshness_counter;
     
     foreach my $nb (@neighbors) {
@@ -577,9 +579,9 @@ sub sharc_node {
         # Update the closest distance to originator
         #
         if (get_node_community($G, $n, %parameters) == get_node_community($G, $nb, %parameters) &&
-            (!$originator_distance || $originator_distance < get_originator_distance($G, $nb, %parameters))) {
+            (!$originator_distance || $originator_distance > get_originator_distance($G, $nb, %parameters))) {
             $originator_distance = get_originator_distance($G, $nb, %parameters);
-            print "== Node $n is now ".($originator_distance+ 1 )." from ".(get_node_community($G, $n, %parameters))."due to neighbor $nb\n";
+            print "== Node $n is preliminary ".($originator_distance+ 1 )." from ".(get_node_community($G, $n, %parameters))." due to neighbor $nb\n";
         }
         
         #
@@ -596,7 +598,7 @@ sub sharc_node {
     #
     # Should the non fresh steps be increased or reset ?
     #
-    if (!$G->has_vertex_attribute($n, "freshness_counter") ||
+    if ($G->has_vertex_attribute($n, "freshness_counter") &&
         $G->get_vertex_attribute($n, "freshness_counter") >= $freshness_counter) {
         my $nf_st = 0;
         $nf_st = $G->get_vertex_attribute($n, "non_fresh_steps")
@@ -642,23 +644,24 @@ sub sharc_node {
         set_originator_distance($G, $n, 0, %parameters);
         
         my $oc = 1;
-        $oc = $G->get_vertex_attribute($G, $n, "originator_counter") + 1
-            if ($G->has_vertex_attribute($G, $n, "originator_counter"));
-        $G->set_vertex_attribute($G, $n, "freshness_counter", $oc);
+        $oc = $G->get_vertex_attribute($n, "originator_counter") + 1
+            if ($G->has_vertex_attribute($n, "originator_counter"));
+        $G->set_vertex_attribute($n, "freshness_counter", $oc);
         print "== Node $n is self-community, distance to originator is 0, freshness is ".($oc)."\n";
     }
     else {
         my $od;
-        my $fc;
+        my $fc = 0;
+        $fc = $G->get_vertex_attribute($n, "freshness_counter") if $G->has_vertex_attribute($n, "freshness_counter");
         foreach my $nb (@neighbors) {
             
             #
             # Update the closest distance to originator
             #
             if (get_node_community($G, $n, %parameters) == get_node_community($G, $nb, %parameters) &&
-                (!$od || $od < get_originator_distance($G, $nb, %parameters))) {
+                (!$od || $od > get_originator_distance($G, $nb, %parameters))) {
                 $od = get_originator_distance($G, $nb, %parameters);
-                print "== Node $n is now ".($od + 1)." from ".(get_node_community($G, $n, %parameters))."due to neighbor $nb\n";
+                print "== Node $n is now ".($od + 1)." from ".(get_node_community($G, $n, %parameters))." due to neighbor $nb\n";
             }
             
             #
@@ -672,7 +675,7 @@ sub sharc_node {
             }
         }
         set_originator_distance($G, $n, ($od+1), %parameters);
-        $G->set_vertex_attribute($G, $n, "freshness_counter", $fc);
+        $G->set_vertex_attribute($n, "freshness_counter", $fc);
     }
 }
 

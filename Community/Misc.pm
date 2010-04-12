@@ -33,7 +33,7 @@ use base 'Exporter';
 use List::Util 'shuffle';
 
 our $VERSION = '0.1';
-our @EXPORT  = qw(get_node_community set_node_community);
+our @EXPORT  = qw(get_node_community set_node_community get_originator_distance set_originator_distance);
 
 sub get_node_community {
     my $G = shift;
