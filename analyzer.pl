@@ -369,7 +369,7 @@ EOF
     my $i=0;
     foreach my $a (sort keys %algorithms) {
         print PLT "\t'$datfile' using 1:".(4*$i+2)." with lines ls ".(2*$i+1)." notitle, \\\n";
-        print PLT "\t'$datfile' using 1:".(4*$i+2).":\$(".(4*$i+3)."/2) with errorbars ls ".(2*$i+1)." title '$a', \\\n";
+        print PLT "\t'$datfile' using 1:".(4*$i+2).":(\$".(4*$i+3)."/2) with errorbars ls ".(2*$i+1)." title '$a', \\\n";
         print PLT "\t'$datfile' using 1:".(4*$i+4)." with lines ls ".(2*$i+2)." notitle, \\\n";
         print PLT "\t'$datfile' using 1:".(4*$i+5)." with lines ls ".(2*$i+2)." notitle";
         print PLT ", \\" if ($i+1 < (scalar keys %algorithms));
@@ -517,7 +517,7 @@ EOF
         my $i=0;
         foreach my $a (sort keys %algorithms) {
             print PLT "\t'$datfile' using 1:".(4*$i+2)." with lines ls ".(2*$i+1)." notitle, \\\n";
-            print PLT "\t'$datfile' using 1:".(4*$i+2).":\$(".(4*$i+3)."/2) with errorbars ls ".(2*$i+1)." title '$a', \\\n";
+            print PLT "\t'$datfile' using 1:".(4*$i+2).":(\$".(4*$i+3)."/2) with errorbars ls ".(2*$i+1)." title '$a', \\\n";
             print PLT "\t'$datfile' using 1:".(4*$i+4)." with lines ls ".(2*$i+2)." notitle, \\\n";
             print PLT "\t'$datfile' using 1:".(4*$i+5)." with lines ls ".(2*$i+2)." notitle";
             print PLT ", \\" if ($i+1 < (scalar keys %algorithms));
