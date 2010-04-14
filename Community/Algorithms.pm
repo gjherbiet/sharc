@@ -294,11 +294,11 @@ sub leung_node {
         #
         # Update the score table
         #
-        my $weigth = 1;
-        $weigth = $G->get_edge_weight($nb, $n) if (!exists($parameters{unweighted}));
+        my $weight = 1;
+        $weight = $G->get_edge_weight($nb, $n) if (!exists($parameters{unweighted}));
         
         $score{$nb_community} += $nb_label_score * 
-                $G->degree($nb) ** $parameters{m} * $weigth;
+                $G->degree($nb) ** $parameters{m} * $weight;
                 
         #
         # Update the maximum label score heard for this community if necessary
