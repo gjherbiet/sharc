@@ -33,6 +33,7 @@ use base 'Exporter';
 use Graph;              # Graph management library
 use File::Basename;     # File name and path management
 
+
 our $VERSION = '0.1';
 our @EXPORT  = qw(parse parse_gml parse_lfr parse_dgs);
 
@@ -393,7 +394,8 @@ sub _parse_dgs_v12 {
             if (/^(a|c)n "(\d+)" (\d+\.?\d*) (\d+\.?\d*)/) {
                 #print "$1 $2 $3 $4\n";
                 $G->add_vertex(($2+1)) if ($1 eq "a");
-                $G->set_vertex_attributes(($2+1), {x =>$3, y => $4});
+                $G->set_vertex_attribute(($2+1), "x", $3);
+                $G->set_vertex_attribute(($2+1), "y", $4);
             }
             #dn "0"
             elsif (/^dn "(\d+)"$/) {
@@ -415,6 +417,7 @@ sub _parse_dgs_v12 {
         }
     }
     close(DGS);
+    
     if (exists($parameters{graph})) {
         return ($G, ($step+1));
     }
