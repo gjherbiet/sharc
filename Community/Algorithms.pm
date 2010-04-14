@@ -294,8 +294,11 @@ sub leung_node {
         #
         # Update the score table
         #
+        my $weigth = 1;
+        $weigth = $G->get_edge_weight($nb, $n) if (!exists($parameters{unweighted}));
+        
         $score{$nb_community} += $nb_label_score * 
-                $G->degree($nb) ** $parameters{m} * $G->get_edge_weight($nb, $n);
+                $G->degree($nb) ** $parameters{m} * $weigth;
                 
         #
         # Update the maximum label score heard for this community if necessary
@@ -331,7 +334,7 @@ sub leung_node {
     # Now search for the node with the max community label with the highest score
     #
     my $new_score;
-    if (scalar keys %score > 0) {
+    if (scalar keys %score > 0 && $max_community != $n) {
         $new_score = $max_label_score{$max_community} - $parameters{delta};
     }
     else {
