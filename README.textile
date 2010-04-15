@@ -50,6 +50,8 @@ assignment.pl [-h|--help] [-v|--verbose] [--version]
                                are used (leading to m-n simulations)
                           iii) n..m+k : all numbers starting at n, incremented
                                by k and lesser or equal to m are used
+    --ubigraph, -u      : Use UbiGraph for dynamic 3D visualization of
+                          assignment process
 
     NOTE: if N networks, A algorithms and S seeds are specified, then the
     script will be executed once for all the N*A*S unique configurations.
