@@ -464,6 +464,232 @@ sub ecdns_node {
     set_node_community($G, $n, $max_community, %parameters);
 }
 
+sub sharc {
+    my $G = shift;
+    my %parameters = @_;
+    
+    #
+    # The sharc mode requires the "step" parameter to be set
+    #
+    unless (exists($parameters{step})) {
+        die("Error: the sharc algorithm requires the optional argument step.
+            Please use \"sharc(\$G, step => \$step)\".\n");
+    }
+    
+    my $period= 1;
+    $period = $parameters{period} if (exists $parameters{period});
+
+    foreach my $node (shuffle($G->vertices)) {
+        #
+        # Perform the actual community assignment
+        #
+        if ($period == 1 || ($node % $period) == ($parameters{step} % $period)) {
+            #print "Performing ecdns for node $node, step is $parameters{step}.\n";
+            #print "($node % $period) =".($node % $period)." ($parameters{step} % $period) =".($parameters{step} % $period).".\n";
+            sharc_node($G, $node, %parameters);
+        }
+    }
+}
+
+sub sharc_node {
+    my $G = shift;
+    my $n = shift;
+    my %parameters = @_;
+    
+    my $step = $parameters{step};
+    
+    #
+    # Tells if an update has happened
+    #
+    my $updated = 0;
+    
+    #
+    # Break threshold is the number of "non-fresh"  steps required
+    # to enter break mode
+    #
+    my $break_threshold = 3;
+    $break_threshold = $parameters{break_threshold} if (exists($parameters{break_threshold}));
+    
+    #
+    # Break mode lifetime default value
+    #
+    my $broken_lifetime = 1;
+    $broken_lifetime = $parameters{broken_lifetime} if (exists($parameters{broken_lifetime}));
+    
+    #
+    # Get the current node neighbors
+    #
+    my @neighbors = $G->neighbours($n);
+    
+    #
+    # If the node has no neighbors, simply set myself back to self-community
+    #
+    if (scalar @neighbors == 0 && !$updated) {
+        set_node_community($G, $n, $n, %parameters);
+        print "($step) Node $n enters self-community.\n";
+        $updated = 1;
+    }
+    
+    #
+    # I'm in break mode, and this mode hasn't expired,
+    # do nothing but decreasing the break mode lifetime
+    # TODO: need to update my distance to originator ????
+    #
+    if ($G->has_vertex_attribute($n, "broken_community") &&
+        $G->has_vertex_attribute($n, "broken_lifetime") &&
+        $G->get_vertex_attribute($n, "broken_lifetime") > 0 &&
+        !$updated) {
+        
+        my $bl = $G->get_vertex_attribute($n, "broken_lifetime");
+        $G->set_vertex_attribute($n, "broken_lifetime", ($bl -1));
+        print "($step) Node $n remains in break mode (".($G->get_vertex_attribute($n, "broken_lifetime"))." remaining).\n";
+        $updated = 1;
+    }
+    #
+    # Otherwise, cleanup break mode attributes
+    #
+    else {
+        $G->delete_vertex_attribute($n, "broken_community");
+        $G->delete_vertex_attribute($n, "broken_lifetime");
+    }
+    
+    #
+    # Now, perform operations on the neighbors to see if I shall enter
+    # neighbor break, a new break mode or simply apply ECDNS
+    #
+    my $originator_distance;
+    $originator_distance = 0 if (get_node_community($G, $n, %parameters) == $n);
+    
+    my $freshness_counter;
+    
+    foreach my $nb (@neighbors) {
+        #
+        # Neighbor break mode :
+        # I have a neighbor node in break that was in the same community I'm in
+        # TODO: need to update my distance to originator ????
+        #
+        if ($G->has_vertex_attribute($nb, "broken_community") &&
+            $G->get_vertex_attribute($nb, "broken_community") == get_node_community($G, $n, %parameters)
+            && !$updated) {
+
+            $G->set_vertex_attribute($n, "broken_community",
+                get_node_community($G, $n, %parameters));
+            $G->set_vertex_attribute($n, "broken_lifetime", $broken_lifetime);
+            set_node_community($G, $n, get_node_community($G, $nb, %parameters), %parameters);
+            print "($step) Node $n enters neighbor break due to neighbor $nb\n";
+            $updated = 1;
+        }
+        
+        #
+        # Update the closest distance to originator
+        #
+        if (get_node_community($G, $n, %parameters) == get_node_community($G, $nb, %parameters) &&
+            (!$originator_distance || $originator_distance > get_originator_distance($G, $nb, %parameters))) {
+            $originator_distance = get_originator_distance($G, $nb, %parameters) + 1;
+            print "($step) Node $n is preliminary ".($originator_distance)." from ".(get_node_community($G, $n, %parameters))." due to neighbor $nb\n";
+        }
+        
+        #
+        # Update the freshness counter
+        #
+        if (get_node_community($G, $n, %parameters) == get_node_community($G, $nb, %parameters) &&
+            $G->has_vertex_attribute($nb, "freshness_counter") && 
+            (!$freshness_counter || $freshness_counter < $G->get_vertex_attribute($nb, "freshness_counter"))) {
+            $freshness_counter = $G->get_vertex_attribute($nb, "freshness_counter");
+            print "($step) Node $n sets freshness counter to $freshness_counter due to neighbor $nb\n";
+        }
+    }
+    
+    #
+    # Should the non fresh steps be increased or reset ?
+    #
+    if ($G->has_vertex_attribute($n, "freshness_counter") && $freshness_counter &&
+        $G->get_vertex_attribute($n, "freshness_counter") >= $freshness_counter &&
+        get_node_community($G, $n, %parameters) != $n) {
+        my $nf_st = 0;
+        $nf_st = $G->get_vertex_attribute($n, "non_fresh_steps")
+            if ($G->has_vertex_attribute($n, "non_fresh_steps"));
+        $G->set_vertex_attribute($n, "non_fresh_steps", ($nf_st + 1));
+        print "($step) Node $n increases non fresh steps to ".($nf_st + 1)."\n";
+    }
+    else {
+        $G->set_vertex_attribute($n, "non_fresh_steps", 0);
+        print "($step) Node $n resets non fresh steps to 0\n";
+    }
+    
+    #
+    # Enter break mode
+    #
+    if ($G->get_vertex_attribute($n, "non_fresh_steps") >= $break_threshold &&
+        get_originator_distance($G, $n, %parameters) < $originator_distance &&
+        !$updated) {
+        
+        $G->set_vertex_attribute($n, "broken_community",
+            get_node_community($G, $n, %parameters));
+        $G->set_vertex_attribute($n, "broken_lifetime", $broken_lifetime);
+        set_node_community($G, $n, $n, %parameters);
+        print "($step) Node $n enters break mode\n";
+        $updated = 1;
+    }
+    
+    #
+    # If still not updated, apply "simple" ECDNS
+    #
+    unless ($updated) {
+        print "($step) Node $n performs simple ECDNS\n";
+        ecdns_node($G, $n, %parameters);
+        print "($step) Node $n now has community ".(get_node_community($G, $n, %parameters))."\n";
+        $updated = 1;
+    }
+    
+    #
+    # Update the distance to (possibly new) originator
+    # Update the (possibly new) freshness counter
+    #
+    if (get_node_community($G, $n, %parameters) == $n) {
+
+        set_originator_distance($G, $n, 0, %parameters);
+        
+        my $oc = 1;
+        $oc = $G->get_vertex_attribute($n, "originator_counter") + 1
+            if ($G->has_vertex_attribute($n, "originator_counter"));
+        $G->set_vertex_attribute($n, "originator_counter", $oc);
+        $G->set_vertex_attribute($n, "freshness_counter", $oc);
+        print "($step) Node $n is is own originator, distance to originator is 0, freshness counter is ".($oc)."\n";
+    }
+    else {
+        my $od;
+        my $fc = 0;
+        $fc = $G->get_vertex_attribute($n, "freshness_counter") if $G->has_vertex_attribute($n, "freshness_counter");
+        foreach my $nb (@neighbors) {
+            
+            #
+            # Update the closest distance to originator
+            #
+            if (get_node_community($G, $n, %parameters) == get_node_community($G, $nb, %parameters) &&
+                (!$od || $od > get_originator_distance($G, $nb, %parameters) + 1)) {
+                $od = get_originator_distance($G, $nb, %parameters) + 1;
+                print "($step) Node $n is ".$od." from ".(get_node_community($G, $n, %parameters))." due to neighbor $nb\n";
+            }
+            
+            #
+            # Update the freshness counter
+            #
+            if (get_node_community($G, $n, %parameters) == get_node_community($G, $nb, %parameters) &&
+                $G->has_vertex_attribute($nb, "freshness_counter") &&
+                (!$fc || $fc < $G->get_vertex_attribute($nb, "freshness_counter"))) {
+                $fc = $G->get_vertex_attribute($nb, "freshness_counter");
+                print "($step) Node $n sets freshness counter to $fc due to neighbor $nb\n";
+            }
+        }
+        set_originator_distance($G, $n, $od, %parameters);
+        $G->set_vertex_attribute($n, "freshness_counter", $fc);
+        
+        print "($step) Node $n is finally ".$od." from ".(get_node_community($G, $n, %parameters))."\n";
+        print "($step) Node $n finally sets freshness counter to $fc\n";
+    }
+}
+
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
