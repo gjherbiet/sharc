@@ -75,6 +75,7 @@ my @extra;              # List of extra arguments passed to the algorithm
 my $rand_k;             # Average degree for random graphs
 my $rand_N;             # Number of nodes for random graphs
 my $rand_s;             # Seed for random graphs
+my $ubigraph;           # Use Urbigraph for output
 
 my %metrics_functions = (
     "Q"     => "modularity",
@@ -104,7 +105,8 @@ my $res = GetOptions(
     'metric|m=s'    => sub { set_metrics( $_[1] ) },
     'logpath|l=s'   => \$logpath,
     'seed|s=s'      => sub { set_seeds( $_[1] ) },
-    'extra|e=s'       => \@extra
+    'extra|e=s'     => \@extra,
+    'ubigraph|u+'   => \$ubigraph
 );
 
 #pod2usage(-exitval => 1, -verbose => 2)
@@ -203,9 +205,10 @@ foreach my $network (@networks) {
             
             #
             # First generate the Ubigraph object
-            # TODO: only do this if requested
             #
-            my ($UG, $ug_edges) = ubigraph_create($G, %parameters);
+            my $UG;
+            my $ug_edges;
+            ($UG, $ug_edges) = ubigraph_create($G, %parameters) if ($ubigraph);
             
             #
             # Initialize the simulation at step 0
@@ -284,8 +287,10 @@ foreach my $network (@networks) {
                 # Update the Ubigraph object
                 # TODO: only do this if requested
                 #
-                $parameters{ubigraph_edges} = $ug_edges;
-                my ($UG, $ug_edges) = ubigraph_update($G, $UG, %parameters);
+                if ($ubigraph) {
+                    $parameters{ubigraph_edges} = $ug_edges;
+                    ($UG, $ug_edges) = ubigraph_update($G, $UG, %parameters);
+                }
             }
             print LOG "(".($step-1).") T=".($end_iter-$start)."\n";
             close(LOG);
@@ -451,6 +456,8 @@ $COMMAND [-h|--help] [-v|--verbose] [--version]
                                are used (leading to m-n simulations)
                           iii) n..m+k : all numbers starting at n, incremented
                                by k and lesser or equal to m are used
+    --ubigraph, -u      : Use UbiGraph for dynamic 3D visualization of
+                          assignment process
                                
     NOTE: if N networks, A algorithms and S seeds are specified, then the
     script will be executed once for all the N*A*S unique configurations.
