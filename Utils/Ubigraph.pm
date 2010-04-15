@@ -44,9 +44,6 @@ sub ubigraph_create {
     my $G =  shift;
     my %parameters = @_;
     
-    # Start the server of die
-    #TODO
-    
     my $UG = new Ubigraph() or
         die("Error in creating new UbiGraph object: $!\n");
         
@@ -54,7 +51,7 @@ sub ubigraph_create {
     $parameters{ubigraph_edges} = {};
     my $ug_edges;
     ($UG, $ug_edges) = ubigraph_update($G, $UG, %parameters);
-
+    
     return ($UG, $ug_edges);
 }
 
