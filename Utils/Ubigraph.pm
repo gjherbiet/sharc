@@ -3,7 +3,7 @@
 # Author : Guillaume-Jean Herbiet  <guillaume.herbiet@uni.lu>
 #
 #
-# Copyright (c) 2009 Guillaume-Jean Herbiet     (http://herbiet.gforge.uni.lu)
+# Copyright (c) 2010 Guillaume-Jean Herbiet     (http://herbiet.gforge.uni.lu)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
