@@ -41,7 +41,7 @@ use Utils::Read;            # Read graphs from various formats
 use Community::Algorithms;  # Community algorithms
 use Community::Metrics;     # Community metrics
 use Utils::Stability;       # Stability metrics
-
+use Utils::Ubigraph;        # Output to dynamic graph visualization software
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
@@ -202,6 +202,12 @@ foreach my $network (@networks) {
             print LOG "$network_name V=".($G->vertices())." E=".($G->edges())." $algo $seed\n";
             
             #
+            # First generate the Ubigraph object
+            # TODO: only do this if requested
+            #
+            my ($UG, $ug_edges) = ubigraph_create($G, %parameters);
+            
+            #
             # Initialize the simulation at step 0
             #
             my $step = 0;
@@ -226,6 +232,7 @@ foreach my $network (@networks) {
                 # Update some potentially required parameters for the algorithm
                 #
                 $parameters{step} = $step;
+                print "$step\n";
                 
                 #
                 # Update the link weights if a particular stability
@@ -272,6 +279,13 @@ foreach my $network (@networks) {
                     parse($network, graph => $G, step => $step);
                 }
                 else {$step++;}
+                
+                #
+                # Update the Ubigraph object
+                # TODO: only do this if requested
+                #
+                $parameters{ubigraph_edges} = $ug_edges;
+                my ($UG, $ug_edges) = ubigraph_update($G, $UG, %parameters);
             }
             print LOG "(".($step-1).") T=".($end_iter-$start)."\n";
             close(LOG);

@@ -24,7 +24,7 @@
 # 6, rue Richard Coudenhove-Kalergi
 # L-1359 Luxembourg
 ##############################################################################
-package Utils::Read;
+package Utils::Ubigraph;
 
 use strict;
 use warnings;
@@ -35,7 +35,7 @@ use Ubigraph;           # Dynamic graph visualization software
 use Community::Misc;    # Easy access to community information
 
 our $VERSION = '0.1';
-our @EXPORT  = qw(ubigraph_update);
+our @EXPORT  = qw(ubigraph_create ubigraph_update);
 
 #
 # Create an original ubigraph server and graph object
@@ -52,9 +52,10 @@ sub ubigraph_create {
         
     # First update the graph
     $parameters{ubigraph_edges} = {};
-    ubigraph_update($G, $UG, %parameters);
+    my $ug_edges;
+    ($UG, $ug_edges) = ubigraph_update($G, $UG, %parameters);
 
-    return $UG;
+    return ($UG, $ug_edges);
 }
 
 #
@@ -75,6 +76,7 @@ sub ubigraph_update {
     
     # Update edges
     my $ug_edges = _update_edges($G, $UG, %parameters);
+
     return ($UG, $ug_edges);
 }
 
@@ -85,20 +87,27 @@ sub _update_vertices {
     
     foreach my $n ($G->vertices) {
         # Create an ubigraph vertex for this vertex if required
-        unless ($G->has_vertex_parameter($n, "ubigraph_vertex")) {
+        unless ($G->has_vertex_attribute($n, "ubigraph_vertex")) {
             $G->set_vertex_attribute($n, "ubigraph_vertex",
-                $UG->Vertex(size => "1");
-            );
+                $UG->Vertex(size => "1"));
         }
         # Get the reference to the ubigraph vertex
-        my $v = $G->get_vertex_parameter($n, "ubigraph_vertex");
+        my $v = $G->get_vertex_attribute($n, "ubigraph_vertex");
         
         # Now update the style of the edges based on their assignment
         my $c = get_node_community($G, $n, %parameters);
         $v->label("$n <$c>");
-        $v->color($c);
+        # my $mod = $c%3;
+        #         my @c;
+        #         $c[$mod] = sprintf("%02X", $c * (255 / (scalar $G->vertices)));
+        #         $c[($mod+1)%3] = sprintf("%02X", int($c / 3) * (255 / (scalar $G->vertices) / 3));
+        #         $c[($mod+2)%3] = sprintf("%02X", int($c / 9) * (255 / (scalar $G->vertices) / 9));
+        #         my $col = join("", @c);
+        my $col = _hex_color_from_community($G, $c);
+        $v->color("#".$col);
         if ($n == $c) {
             $v->shape("cube");
+        }
         else {
             $v->shape("sphere");
         }
@@ -129,16 +138,17 @@ sub _update_edges {
         unless (exists($ug_edges->{$u."-".$v})) {
             $ug_edges->{$u."-".$v} = $UG->Edge(
                 $G->get_vertex_attribute($u, "ubigraph_vertex"),
-                $G->get_vertex_attribute($v, "ubigraph_vertex"));
+                $G->get_vertex_attribute($v, "ubigraph_vertex"),
+                showstrain => "true");
         }
         # Get the reference to the ubigraph edge
         my $e = $ug_edges->{$u."-".$v};
         
         # Now update style of edge based on its properties
-        if ($G->is_edge_weighted($u, $v)) {
+        if ($G->has_edge_weight($u, $v)) {
             $e->width($G->get_edge_weight($u, $v));
         }
-        else {$e->width(1);}
+        else {$e->width("1");}
         
         if ($G->has_vertex_attribute($u, "x") && $G->has_vertex_attribute($u, "y") &&
             $G->has_vertex_attribute($v, "x") && $G->has_vertex_attribute($v, "y")) {
@@ -146,10 +156,25 @@ sub _update_edges {
             my $xx = $G->get_vertex_attribute($u, "x") - $G->get_vertex_attribute($v, "x");
             my $yy = $G->get_vertex_attribute($u, "y") - $G->get_vertex_attribute($v, "y");
             my $dist = sqrt( $xx**2 + $yy**2 );
-            
-            $e->strength(1/$dist);
+            $e->strength(25/$dist);
         }
-        else {$e->strength(1);}
+        elsif (get_node_community($G, $u, %parameters) == get_node_community($G, $v, %parameters)) {
+            $e->strength(1);
+        }
+        else {
+            $e->strength(0.2);
+        }
     }
     return $ug_edges;
 }
+
+sub _hex_color_from_community {
+    my $G =  shift;
+    my $c = shift;
+    
+    my $string = sprintf("%06X", $c * (255**3 / (scalar $G->vertices)));
+    my $m = 2;
+    my @groups = unpack "a$m" x (length($string) /$m ), $string;
+    return $groups[$c%3].$groups[(($c%3)+1)%3].$groups[(($c%3)+2)%3];
+}
+
