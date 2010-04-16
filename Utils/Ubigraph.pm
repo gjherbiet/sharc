@@ -150,16 +150,17 @@ sub _update_edges {
             $ug_edges->{$u."-".$v} = $UG->Edge(
                 $G->get_vertex_attribute($u, "ubigraph_vertex"),
                 $G->get_vertex_attribute($v, "ubigraph_vertex"),
-                showstrain => "true");
+                #showstrain => "true");
+                color => "#ffffff");
         }
         # Get the reference to the ubigraph edge
         my $e = $ug_edges->{$u."-".$v};
         
         # Now update style of edge based on its properties
-        if ($G->has_edge_weight($u, $v)) {
+        if ($G->has_edge_weight($u, $v) && $G->get_edge_weight($u, $v) != 1) {
             $e->width($G->get_edge_weight($u, $v));
         }
-        else {$e->width("1");}
+        else {$e->width("2");}
         
         if ($G->has_vertex_attribute($u, "x") && $G->has_vertex_attribute($u, "y") &&
             $G->has_vertex_attribute($v, "x") && $G->has_vertex_attribute($v, "y")) {
