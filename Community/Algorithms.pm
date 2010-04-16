@@ -165,6 +165,7 @@ sub synchronous_asynchronous_node {
         set_node_community($G, $n, $prev_community, community_field => $prev_community_field);
     }
     set_node_community($G, $n, $max_community, community_field => $community_field);
+    $G->set_vertex_attribute($n, $community_field."_score", $max_score);
 }
 #-----------------------------------------------------------------------------
 
@@ -364,6 +365,7 @@ sub leung_node {
     #
     $G->set_vertex_attribute($n, $label_score, $new_score);
     set_node_community($G, $n, $max_community, community_field => $community_field);
+    $G->set_vertex_attribute($n, $community_field."_score", $new_score);
 }
 #-----------------------------------------------------------------------------
 
@@ -410,6 +412,9 @@ sub ecdns_node {
         @dist = _weight_dist($G, $n, %parameters);
         #print "".join(" ", @dist)." l:".(scalar @dist)."\n";
     }
+    
+    my $community_field = exists($parameters{community_field}) ?
+        $parameters{community_field} : "community";
     
     #
     # Store the score of each neighboring community
@@ -462,6 +467,7 @@ sub ecdns_node {
     }
     #print "$n: $max_community ($max_score).\n";
     set_node_community($G, $n, $max_community, %parameters);
+    $G->set_vertex_attribute($n, $community_field."_score", $max_score / (scalar $G->neighbours($n)));
 }
 
 sub sharc {

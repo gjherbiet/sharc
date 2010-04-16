@@ -82,6 +82,8 @@ sub _update_vertices {
     my $UG = shift;
     my %parameters = @_;
     
+    my $max_community_score = 0;
+    
     foreach my $n ($G->vertices) {
         # Create an ubigraph vertex for this vertex if required
         unless ($G->has_vertex_attribute($n, "ubigraph_vertex")) {
@@ -108,8 +110,20 @@ sub _update_vertices {
         else {
             $v->shape("sphere");
         }
-        # TODO: membership strength for size
+        if ($G->has_vertex_attribute($n, "community_score") &&
+            $G->get_vertex_attribute($n, "community_score") > $max_community_score) {
+            $max_community_score = $G->get_vertex_attribute($n, "community_score");
+        }
     }
+    
+    foreach my $n ($G->vertices) {
+        my $v = $G->get_vertex_attribute($n, "ubigraph_vertex");
+        if ($G->has_vertex_attribute($n, "community_score")) {
+            $v->size(2*$G->get_vertex_attribute($n, "community_score") / $max_community_score);
+            #print "$n: size=".(2*$G->get_vertex_attribute($n, "community_score") / $max_community_score)."\n";
+        }
+    }
+    
 }
 
 sub _update_edges {
@@ -156,7 +170,7 @@ sub _update_edges {
             $e->strength(25/$dist);
         }
         elsif (get_node_community($G, $u, %parameters) == get_node_community($G, $v, %parameters)) {
-            $e->strength(1);
+            $e->strength(0.8);
         }
         else {
             $e->strength(0.2);
