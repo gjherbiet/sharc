@@ -422,6 +422,11 @@ sub ecdns_node {
     my %score;
     
     #
+    # Store the highest degree neighbor node for each neighboring community
+    #
+    my %highest_degree;
+    
+    #
     # Increment the score based on the neighbors current community and
     # neighborhood similarity metric
     #
@@ -453,6 +458,13 @@ sub ecdns_node {
             $s = _neighborhood_similarity($G, $n, $nb);
         }
         $score{get_node_community($G, $nb, %parameters)} += $s;
+        
+        if (!$highest_degree{get_node_community($G, $nb, %parameters)} ||
+            $highest_degree{get_node_community($G, $nb, %parameters)} <
+            (scalar $G->neighbours($nb))) {
+            $highest_degree{get_node_community($G, $nb, %parameters)} =
+            (scalar $G->neighbours($nb));
+        }
     }
     
     #
@@ -463,11 +475,13 @@ sub ecdns_node {
                                 # by any other heard community
     foreach my $community (sort keys %score) {
         ($max_score, $max_community) = 
-            _max_random_tie($score{$community}, $max_score, $community, $max_community);
+            _max_degree_tie($score{$community}, $max_score, $community, $max_community, \%highest_degree);
+        print "<$n> ($max_score, $max_community)\n" if ($n == 10);
     }
     #print "$n: $max_community ($max_score).\n";
     set_node_community($G, $n, $max_community, %parameters);
     $G->set_vertex_attribute($n, $community_field."_score", $max_score / (scalar $G->neighbours($n)));
+    print "<$n> F=($max_score, $max_community)\n" if ($n == 10);
 }
 
 sub sharc {
@@ -768,6 +782,27 @@ sub _max_random_tie {
 		return ($current_max, $current_winner);
 	}
 }
+
+sub _max_degree_tie {
+    my ($value, $current_max, $candidate, $current_winner, $degrees) = @_;
+	
+	# New highest value is found or ex-aequo and tie-break is won
+	# Return the new max and the winner candidate;
+	if ( $value > $current_max ||
+		($value == $current_max && $degrees->{$candidate} > $degrees->{$current_winner})) {
+		print "using degree: $degrees->{$candidate} > $degrees->{$current_winner}" if ($value == $current_max);
+		return ($value, $candidate);
+	}
+	elsif ($value == $current_max && $degrees->{$candidate} == $degrees->{$current_winner}) {
+	    _max_random_tie($value, $current_max, $candidate, $current_winner)
+	}
+	# Otherwise, the max value and the winner didn't change
+	else {
+		return ($current_max, $current_winner);
+	}
+}
+
+
 #-----------------------------------------------------------------------------
 
 1;
