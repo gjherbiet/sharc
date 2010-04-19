@@ -48,9 +48,15 @@ sub assignment {
     
     my $str;
     foreach my $c (sort {$a <=> $b} keys %C) {
-        my @nodes = sort (@{$C{$c}});
+        my @nodes = sort {$a <=> $b} (@{$C{$c}});
         $str .= $c.":[";
-        $str .= join(" ", @nodes);
+        foreach my $n (@nodes) {
+            $str .= "$n";
+            if ($G->has_vertex_attribute($n, "community_score")) {
+                $str .= "(".($G->get_vertex_attribute($n, "community_score")).")";
+            }
+            $str .= " ";
+        }
         chomp($str);
         $str .= "] ";
     }
