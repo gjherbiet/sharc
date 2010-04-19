@@ -474,14 +474,14 @@ sub ecdns_node {
     my $max_score       = -1;   # itself its own community, but this is superseeded
                                 # by any other heard community
     foreach my $community (sort keys %score) {
+        print "<$n> $community = $score{$community}\n" if ($n == 6);
         ($max_score, $max_community) = 
             _max_degree_tie($score{$community}, $max_score, $community, $max_community, \%highest_degree);
-        print "<$n> ($max_score, $max_community)\n" if ($n == 10);
+            #_max_random_tie($score{$community}, $max_score, $community, $max_community);
     }
     #print "$n: $max_community ($max_score).\n";
     set_node_community($G, $n, $max_community, %parameters);
     $G->set_vertex_attribute($n, $community_field."_score", $max_score / (scalar $G->neighbours($n)));
-    print "<$n> F=($max_score, $max_community)\n" if ($n == 10);
 }
 
 sub sharc {
@@ -790,7 +790,6 @@ sub _max_degree_tie {
 	# Return the new max and the winner candidate;
 	if ( $value > $current_max ||
 		($value == $current_max && $degrees->{$candidate} > $degrees->{$current_winner})) {
-		print "using degree: $degrees->{$candidate} > $degrees->{$current_winner}" if ($value == $current_max);
 		return ($value, $candidate);
 	}
 	elsif ($value == $current_max && $degrees->{$candidate} == $degrees->{$current_winner}) {
