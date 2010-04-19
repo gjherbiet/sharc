@@ -203,6 +203,12 @@ foreach my $network (@networks) {
             my $G = $G0->deep_copy();
             print LOG "$network_name V=".($G->vertices())." E=".($G->edges())." $algo $seed\n";
             
+            # Print the reference assignment if this metric is requested
+            if (grep(/^A$/, @metrics)) {
+                my @res = assignment($G, community_field => "value");
+                print LOG "(-) A=".join(" ", @res)."\n";
+            }
+            
             #
             # First generate the Ubigraph object
             #
