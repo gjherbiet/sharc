@@ -702,6 +702,16 @@ sub sharc_node {
                 print "($step) Node $n sets freshness counter to $fc due to neighbor $nb\n";
             }
         }
+        
+        #
+        # No originator neighbor is found: this is the case if the node has no
+        # neighbor of the same community, consider itself as the max appart
+        # from its considered originator
+        #
+        if (!$od) {
+            $od = 2**53;
+            print "($step) Node $n has ".(scalar @neighbors)." neighbors but no distance to originator set, setting to maximal value.\n";
+        }
         set_originator_distance($G, $n, $od, %parameters);
         $G->set_vertex_attribute($n, "freshness_counter", $fc);
         
