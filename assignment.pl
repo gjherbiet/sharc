@@ -241,7 +241,7 @@ foreach my $network (@networks) {
                 # Update some potentially required parameters for the algorithm
                 #
                 $parameters{step} = $step;
-                print "$step\n";
+                #print "$step\n";
                 
                 #
                 # Update the link weights if a particular stability
