@@ -448,7 +448,7 @@ $COMMAND [-h|--help] [-v|--verbose] [--version]
                           Repeat option multiple times to define several extra
                           parameters. When same parameter is given multiple times,
                           only the last entry is meaningful.
-    --stability, -s     : Stability criterion to use as link weight in weighted
+    --stability         : Stability criterion to use as link weight in weighted
                           networks. This is updated at each iteration step
     --metric, -m        : Metric used to evaluate the algorithm. Repeat option
                           for several metrics.
