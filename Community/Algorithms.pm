@@ -457,6 +457,10 @@ sub ecdns_node {
         else {
             $s = _neighborhood_similarity($G, $n, $nb);
         }
+        
+        # Store the node similarity
+        $G->set_vertex_attribute($n, "n_sim-$nb", $s);
+        
         $score{get_node_community($G, $nb, %parameters)} += $s;
         
         if (!$highest_degree{get_node_community($G, $nb, %parameters)} ||
