@@ -98,16 +98,20 @@ sub modularity {
     my $G = shift;
     my %parameters = @_;
     
-    my $weighthed;
-    $weighthed = 1 if (exists($parameters{WQ}));
+    my $weighted;
+    $weighted = 1 if (exists($parameters{WQ}));
     
     my $Q = 0;
     
     my $m = 0;
-    if ($weighthed) {
+    if ($weighted) {
         foreach my $endpoints ($G->edges()) {
             my ($u, $v) = @{$endpoints};
-            $m += $G->get_edge_weight($u, $v);
+            if ($G->has_edge_weight($u, $v)) {
+                $m += $G->get_edge_weight($u, $v);
+            }
+            else {$m += 1;}
+            $m = $G->edges() if($m == 0);
         }
     }
     else {
@@ -126,7 +130,7 @@ sub modularity {
                 my $k_i;
                 my $k_j;
                 
-                if ($weighthed) {
+                if ($weighted) {
                     $k_i = _weighted_degree($G, $n_i, %parameters);
                     $k_j = _weighted_degree($G, $n_j, %parameters);
                 }
@@ -136,10 +140,10 @@ sub modularity {
                 }
                 
                 my $a_ij;
-                if (grep($_ eq $n_j, @neighbors) && $weighthed) {
+                if (grep($_ eq $n_j, @neighbors) && $weighted) {
                     $a_ij = $G->get_edge_weight($n_i, $n_j);
                 }
-                elsif (grep($_ eq $n_j, @neighbors) {$a_ij = 1;}
+                elsif (grep($_ eq $n_j, @neighbors)) {$a_ij = 1;}
                 else {$a_ij = 0;}
                 
                 $Q += $a_ij - (($k_i * $k_j) / (2 * $m));
@@ -163,7 +167,7 @@ sub _weighted_degree {
     
     my $wd = 0;
     foreach my $nb ($G->neighbours($n)) {
-        $wd += $graph->get_edge_weight($n, $nb);
+        $wd += $G->get_edge_weight($n, $nb);
     }
     return $wd;
 }
