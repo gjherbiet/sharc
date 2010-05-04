@@ -35,7 +35,7 @@ use Statistics::Descriptive;
 use Community::Misc;
 
 our $VERSION = '0.1';
-our @EXPORT  = qw(assignment modularity nmi distribution);
+our @EXPORT  = qw(assignment modularity weighted_modularity nmi distribution);
 
 sub assignment {
     my $G = shift;
@@ -98,8 +98,21 @@ sub modularity {
     my $G = shift;
     my %parameters = @_;
     
+    my $weighthed;
+    $weighthed = 1 if (exists($parameters{WQ}));
+    
     my $Q = 0;
-    my $m = $G->edges();
+    
+    my $m = 0;
+    if ($weighthed) {
+        foreach my $endpoints ($G->edges()) {
+            my ($u, $v) = @{$endpoints};
+            $m += $G->get_edge_weight($u, $v);
+        }
+    }
+    else {
+        $m = $G->edges();
+    }
     
     foreach my $n_i ($G->vertices()) {
         my @neighbors = $G->neighbours($n_i);
@@ -110,14 +123,49 @@ sub modularity {
             my $c_j = get_node_community($G, $n_j, %parameters);
             
             if ($c_i == $c_j) {
-                my $k_i = $G->degree($n_i);
-                my $k_j = $G->degree($n_j);
-                my $a_ij = grep($_ eq $n_j, @neighbors) ? 1 : 0;
+                my $k_i;
+                my $k_j;
+                
+                if ($weighthed) {
+                    $k_i = _weighted_degree($G, $n_i, %parameters);
+                    $k_j = _weighted_degree($G, $n_j, %parameters);
+                }
+                else {
+                    $k_i = $G->degree($n_i);
+                    $k_j = $G->degree($n_j);
+                }
+                
+                my $a_ij;
+                if (grep($_ eq $n_j, @neighbors) && $weighthed) {
+                    $a_ij = $G->get_edge_weight($n_i, $n_j);
+                }
+                elsif (grep($_ eq $n_j, @neighbors) {$a_ij = 1;}
+                else {$a_ij = 0;}
+                
                 $Q += $a_ij - (($k_i * $k_j) / (2 * $m));
             }
         }
     }
     return (1/(2*$m)) * $Q;
+}
+
+sub weighted_modularity {
+    my $G = shift;
+    my %parameters = @_;
+    
+    modularity($G, %parameters, WQ => 1);
+}
+
+sub _weighted_degree {
+    my $G = shift;
+    my $n = shift;
+    my %parameters = @_;
+    
+    my $wd = 0;
+    foreach my $nb ($G->neighbours($n)) {
+        $wd += $graph->get_edge_weight($n, $nb);
+    }
+    return $wd;
 }
 
 sub nmi {

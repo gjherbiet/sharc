@@ -79,6 +79,7 @@ my $ubigraph;           # Use Urbigraph for output
 
 my %metrics_functions = (
     "Q"     => "modularity",
+    "WQ"    => "weighted_modularity",
     "NMI"   => "nmi",
     "D"     => "distribution",
     "A"     => "assignment"
@@ -453,7 +454,8 @@ $COMMAND [-h|--help] [-v|--verbose] [--version]
     --metric, -m        : Metric used to evaluate the algorithm. Repeat option
                           for several metrics.
                           Available metrics: D (distribution), Q (modularity),
-                          NMI (normalized mutual information).
+                          WQ (weighted modularity), NMI (normalized mutual information),
+                          D (community size distribution), A (complete assignment).
     --logpath, -l       : path to save the generated log file (Default: ./log)
     --seed, -s          : Value(s) of the seed used to initialize the random
                           number generators. Can be of three forms :
