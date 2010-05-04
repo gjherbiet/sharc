@@ -156,6 +156,7 @@ foreach my $network (@networks) {
         verbose("Generating network from input file $network.");
         ($G0, $max_steps, $network_name) = parse($network);
     }
+    $parameters{network_name} = $network_name;
 
     foreach my $algo (@algos) {
         
