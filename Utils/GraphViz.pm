@@ -74,7 +74,7 @@ sub graphviz_export {
         if ($G->has_vertex_attribute($n, "community")) {
             $attributes{shape} = 'box'
                 if ($G->get_vertex_attribute($n, "community") == $n);
-            $attributes{color} = join(',', _hsv_color_from_community($G, $G->get_vertex_attribute($n, "community")));
+            $attributes{color} = join(',', _hsv_color_from_id($G, $G->get_vertex_attribute($n, "community")));
         }
         if ($G->has_vertex_attribute($n, "community_score") && $max_community_score > 0) {
             $attributes{width} = $G->get_vertex_attribute($n, "community_score") / $max_community_score;
@@ -102,7 +102,15 @@ sub graphviz_export {
             $G->get_vertex_attribute($u, "dagrs_edgelabel-$v") > 0 &&
             $G->has_vertex_attribute($v, "dagrs_edgelabel-$u") &&
             $G->get_vertex_attribute($v, "dagrs_edgelabel-$u") > 0) {
+            #$attributes{color} = join(',', _hsv_color_from_id($G, $G->get_vertex_attribute($u, "dagrs_treeid")));
             $attributes{color} = 'red';
+            $attributes{style} = 'bold';
+        }
+        elsif ($G->has_vertex_attribute($u, "dagrs_edgelabel-$v") &&
+            $G->get_vertex_attribute($u, "dagrs_edgelabel-$v") == 0 &&
+            $G->has_vertex_attribute($v, "dagrs_edgelabel-$u") &&
+            $G->get_vertex_attribute($v, "dagrs_edgelabel-$u") == 0) {
+            $attributes{style} = 'dotted';
         }
         
         $GV->add_edge($u => $v, %attributes);
@@ -115,7 +123,7 @@ sub graphviz_export {
     $GV->as_png($outpath."/".$name."_".$parameters{step}.".png");
 }
 
-sub _hsv_color_from_community {
+sub _hsv_color_from_id {
     my $G =  shift;
     my $c = shift;
     
@@ -125,5 +133,5 @@ sub _hsv_color_from_community {
     
     my $color = Color::Object->newRGB(hex($groups[$c%3]) / 255, hex($groups[(($c%3)+1)%3]) / 255, hex($groups[(($c%3)+2)%3]) / 255);
     my ($h, $s, $v) = $color->asHSV();
-    return ($h / 360, $s, $v);
+    return ($h / 360 , $s, $v);
 }
