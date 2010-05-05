@@ -70,8 +70,12 @@ sub graphviz_export {
     #
     foreach my $n ($G->vertices()) {
         my %attributes = %{$G->get_vertex_attributes($n)};
-        $attributes{shape} = 'box' if ($G->get_vertex_attribute($n, "community") == $n);
-        $attributes{color} = join(',', _hsv_color_from_community($G, $G->get_vertex_attribute($n, "community")));
+        
+        if ($G->has_vertex_attribute($n, "community")) {
+            $attributes{shape} = 'box'
+                if ($G->get_vertex_attribute($n, "community") == $n);
+            $attributes{color} = join(',', _hsv_color_from_community($G, $G->get_vertex_attribute($n, "community")));
+        }
         if ($G->has_vertex_attribute($n, "community_score") && $max_community_score > 0) {
             $attributes{width} = $G->get_vertex_attribute($n, "community_score") / $max_community_score;
             $attributes{height} = $attributes{width};
@@ -90,6 +94,17 @@ sub graphviz_export {
         my ($u, $v) = @{$endpoints};
         my %attributes = %{$G->get_edge_attributes($u, $v)};
         $attributes{label} = $attributes{weight} if (exists($attributes{weight}));
+        
+        #
+        # Add edge coloring if DA-GRS is used
+        #
+        if ($G->has_vertex_attribute($u, "dagrs_edgelabel-$v") &&
+            $G->get_vertex_attribute($u, "dagrs_edgelabel-$v") > 0 &&
+            $G->has_vertex_attribute($v, "dagrs_edgelabel-$u") &&
+            $G->get_vertex_attribute($v, "dagrs_edgelabel-$u") > 0) {
+            $attributes{color} = 'red';
+        }
+        
         $GV->add_edge($u => $v, %attributes);
     }
     
