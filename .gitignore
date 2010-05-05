@@ -14,3 +14,7 @@
 
 # Do not store generated netwoks
 nets/
+
+# Do not store log and output dirs
+log*/
+out*/

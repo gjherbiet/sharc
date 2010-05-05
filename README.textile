@@ -10,11 +10,12 @@ networks using various distributed algorithm.
 
 <pre>
 assignment.pl [-h|--help] [-v|--verbose] [--version]
-    -n|--network network_file [-n|--network network_file_2 ...]
+    (-n|--network network_file [-n|--network network_file_2 ...] | -r|--rand N,k,s)
     -a|--algorithm algorithm_name [-a|--algorithm algorithm_name ...]
     [-e|--extra parameter[=value] [-e|--extra parameter[=value] ...]]
-    [-s|--stability criterion] [-m|--metrics MET [-m|--metrics MET ...]]
-    [-l|--logpath path_to_log_dir] [-s|--seed n|n..m|n..m+k]
+    [--stability criterion] [-m|--metrics MET [-m|--metrics MET ...]]
+    [-l|--logpath path_to_log_dir] [-o|--outpath path_to_out_dir]
+    [-s|--seed n|n..m|n..m+k] [-u|--ubigraph] [-g|--graphviz]
 
     --help, -h          : Print this help, then exit
     --version           : Print the script version, then exit
@@ -44,6 +45,7 @@ assignment.pl [-h|--help] [-v|--verbose] [--version]
                           WQ (weighted modularity), NMI (normalized mutual information),
                           D (community size distribution), A (complete assignment).
     --logpath, -l       : path to save the generated log file (Default: ./log)
+    --outpath, -o       : path to save the generated output file (Default: ./out)
     --seed, -s          : Value(s) of the seed used to initialize the random
                           number generators. Can be of three forms :
                           i)   n: number "n" is used
@@ -53,7 +55,9 @@ assignment.pl [-h|--help] [-v|--verbose] [--version]
                                by k and lesser or equal to m are used
     --ubigraph, -u      : Use UbiGraph for dynamic 3D visualization of
                           assignment process
-
+    --graphviz, -g      : Use tge GraphViz program to generate one graph
+                          snapshot per iteration.
+                           
     NOTE: if N networks, A algorithms and S seeds are specified, then the
     script will be executed once for all the N*A*S unique configurations.
 </pre>

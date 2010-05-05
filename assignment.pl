@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl -w
 
 ##############################################################################
 # File   : assignment.pl
@@ -41,7 +41,6 @@ use Utils::Read;            # Read graphs from various formats
 use Community::Algorithms;  # Community algorithms
 use Community::Metrics;     # Community metrics
 use Utils::Stability;       # Stability metrics
-use Utils::Ubigraph;        # Output to dynamic graph visualization software
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
@@ -70,12 +69,14 @@ my @algos;              # List of algorithms to use
 my @metrics = ("NMI");  # List of metrics to compute
 my $stability;          # Stability criterion to use
 my $logpath = "log";    # Output directory for the simulation results
+my $outpath = "out";    # Output directory for the other generated files
 my @extra;              # List of extra arguments passed to the algorithm
 
 my $rand_k;             # Average degree for random graphs
 my $rand_N;             # Number of nodes for random graphs
 my $rand_s;             # Seed for random graphs
 my $ubigraph;           # Use Urbigraph for output
+my $graphviz;           # Use GraphViz for output
 
 my %metrics_functions = (
     "Q"     => "modularity",
@@ -105,9 +106,11 @@ my $res = GetOptions(
     'stability=s'   => \$stability,
     'metric|m=s'    => sub { set_metrics( $_[1] ) },
     'logpath|l=s'   => \$logpath,
+    'outpath|o=s'   => \$outpath,
     'seed|s=s'      => sub { set_seeds( $_[1] ) },
     'extra|e=s'     => \@extra,
-    'ubigraph|u+'   => \$ubigraph
+    'ubigraph|u+'   => \$ubigraph,
+    'graphviz|g+'   => \$graphviz,
 );
 
 #pod2usage(-exitval => 1, -verbose => 2)
@@ -116,6 +119,10 @@ unless ( $res && ( scalar @networks ) > 0 && ( scalar @algos ) > 0 ) {
     USAGE( exitval => 1);
     exit 1;
 }
+
+# Conditional package loading
+if ($ubigraph) {use Utils::Ubigraph;} # Output to dynamic graph visualization software
+if ($graphviz) {use Utils::GraphViz;}  # Output to snapshot graph visualization software
 
 #-----------------------------------------------------------------------------
 
@@ -156,7 +163,6 @@ foreach my $network (@networks) {
         verbose("Generating network from input file $network.");
         ($G0, $max_steps, $network_name) = parse($network);
     }
-    $parameters{network_name} = $network_name;
 
     foreach my $algo (@algos) {
         
@@ -168,6 +174,7 @@ foreach my $network (@networks) {
         #
         my %parameters;
         set_extra_parameters(\%parameters, \@extra);
+        $parameters{network_name} = $network_name;
 
         foreach my $seed (@seeds) {
             
@@ -293,12 +300,19 @@ foreach my $network (@networks) {
                 
                 #
                 # Update the Ubigraph object
-                # TODO: only do this if requested
                 #
                 if ($ubigraph) {
                     $parameters{ubigraph_edges} = $ug_edges;
                     ($UG, $ug_edges) = ubigraph_update($G, $UG, %parameters);
                 }
+                
+                #
+                # Generate a new GraphViz snapshot
+                #
+                if ($graphviz) {
+                    graphviz_export($G, $outpath, %parameters);
+                }
+
             }
             print LOG "(".($step-1).") T=".($end_iter-$start)."\n";
             close(LOG);
@@ -424,11 +438,12 @@ sub USAGE {
     
     print <<EOF;
 $COMMAND [-h|--help] [-v|--verbose] [--version]
-    -n|--network network_file [-n|--network network_file_2 ...]
+    (-n|--network network_file [-n|--network network_file_2 ...] | -r|--rand N,k,s)
     -a|--algorithm algorithm_name [-a|--algorithm algorithm_name ...]
     [-e|--extra parameter[=value] [-e|--extra parameter[=value] ...]]
-    [-s|--stability criterion] [-m|--metrics MET [-m|--metrics MET ...]]
-    [-l|--logpath path_to_log_dir] [-s|--seed n|n..m|n..m+k]
+    [--stability criterion] [-m|--metrics MET [-m|--metrics MET ...]]
+    [-l|--logpath path_to_log_dir] [-o|--outpath path_to_out_dir]
+    [-s|--seed n|n..m|n..m+k] [-u|--ubigraph] [-g|--graphviz]
     
     --help, -h          : Print this help, then exit
     --version           : Print the script version, then exit
@@ -458,6 +473,7 @@ $COMMAND [-h|--help] [-v|--verbose] [--version]
                           WQ (weighted modularity), NMI (normalized mutual information),
                           D (community size distribution), A (complete assignment).
     --logpath, -l       : path to save the generated log file (Default: ./log)
+    --outpath, -o       : path to save the generated output file (Default: ./out)
     --seed, -s          : Value(s) of the seed used to initialize the random
                           number generators. Can be of three forms :
                           i)   n: number "n" is used
@@ -467,6 +483,8 @@ $COMMAND [-h|--help] [-v|--verbose] [--version]
                                by k and lesser or equal to m are used
     --ubigraph, -u      : Use UbiGraph for dynamic 3D visualization of
                           assignment process
+    --graphviz, -g      : Use tge GraphViz program to generate one graph
+                          snapshot per iteration.
                                
     NOTE: if N networks, A algorithms and S seeds are specified, then the
     script will be executed once for all the N*A*S unique configurations.
