@@ -35,10 +35,26 @@ use Graph;
 use Data::Dumper;
 
 use Community::Misc;
-#use Community::Metrics;
+use Community::Metrics;
 
 our $VERSION = '0.1';
-our @EXPORT  = qw(subtrees tree_bridges mnr);
+our @EXPORT  = qw(operations subtrees performance_ratio tree_bridges mnr);
+
+#
+# Number of operations during step
+#
+sub operations {
+    my $G = shift;
+    my $trees = shift;
+    my %parameters = @_;
+    if (exists($parameters{dagrs_operations})) {
+        return $parameters{dagrs_operations};
+    }
+    else {
+        return -1;
+    }
+}
+
 
 #
 # Number of existing subtrees in the network
@@ -50,6 +66,18 @@ sub subtrees {
     
     return (scalar keys %{$trees});
 }
+
+#
+# Performance ratio: number of subtrees over number of connected components
+#
+sub performance_ratio {
+    my $G = shift;
+    my $trees = shift;
+    my %parameters = @_;
+    
+    return subtrees($G, $trees, %parameters) / (scalar $G->connected_components());
+}
+
 
 #
 # Number of tree edges that are bridges between two communities
@@ -67,6 +95,11 @@ sub tree_bridges {
             $bridges++ if (is_bridge($G, $u, $v, %parameters));
         }
     }
+    my %communities = community_assignment($G, %parameters);
+    if ($bridges > 0) {
+        return ((scalar keys %communities) - 1) / $bridges;
+    }
+    else {return -1;}
 }
 
 #
