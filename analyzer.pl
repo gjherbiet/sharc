@@ -70,6 +70,7 @@ my $time_based = 0;     # Generate time (or iteration) based statistics
 
 my %metrics_functions = (
     "Q"     => "Modularity",
+    "WQ"    => "Weighted Modularity",
     "NMI"   => "Normalized Mutual Information",
     "C"     => "Number of communities",
     "S"     => "Maximum community size",
@@ -438,7 +439,7 @@ foreach my $m (@metrics) {
                     }
                 }
             }
-            print DAT "\n$i $str\n";
+            print DAT "$i $str\n";
             $header = 0 if ($header);
         }
         close(DAT);
