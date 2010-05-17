@@ -38,7 +38,7 @@ use Community::Misc;
 use Community::Metrics;
 
 our $VERSION = '0.1';
-our @EXPORT  = qw(operations subtrees performance_ratio tree_bridges mnr);
+our @EXPORT  = qw(operations subtrees trees_distribution performance_ratio tree_bridges mnr);
 
 #
 # Number of operations during step
@@ -65,6 +65,26 @@ sub subtrees {
     my %parameters = @_;
     
     return (scalar keys %{$trees});
+}
+
+sub trees_distribution {
+    my $G = shift;
+    my $trees = shift;
+    my %parameters = @_;
+    
+    #
+    # Create and add elements to the statistics element
+    #
+    my $stats = Statistics::Descriptive::Full->new();
+    foreach my $t (sort {$a <=> $b} keys %{$trees}) {
+        $stats->add_data((scalar $trees->{$t}->edges()));
+    }
+    
+    #
+    # Return statistical data
+    #
+    return ($stats->count(), $stats->mean(), $stats->standard_deviation(),
+            $stats->median(), $stats->min(), $stats->max());
 }
 
 #
