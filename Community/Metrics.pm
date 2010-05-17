@@ -35,7 +35,7 @@ use Statistics::Descriptive;
 use Community::Misc;
 
 our $VERSION = '0.1';
-our @EXPORT  = qw(assignment modularity weighted_modularity nmi distribution);
+our @EXPORT  = qw(assignment modularity weighted_modularity nmi distribution community_assignment);
 
 sub assignment {
     my $G = shift;
@@ -211,10 +211,7 @@ sub nmi {
     }
 }
 
-#-----------------------------------------------------------------------------
-# Helper functions
-#
-sub _community_assignment {
+sub community_assignment {
     my $G = shift;
     my %parameters = @_;
 
