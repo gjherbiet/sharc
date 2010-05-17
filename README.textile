@@ -31,6 +31,8 @@ assignment.pl [-h|--help] [-v|--verbose] [--version]
                           are not parsed.
     --algorithm, -a     : Name of the algorithm to execute. Repeat option
                           for several algorithms.
+    --tree-algorithm, -t: Name of the minimum spanning tree algorithm to
+                          execute. 
     --extra, -e         : Extra algorithm parameters. Can be of the form
                           i)   parameter: set parameter to 1 (true)
                           ii)  parameter=value: set parameter to value
@@ -57,7 +59,7 @@ assignment.pl [-h|--help] [-v|--verbose] [--version]
                           assignment process
     --graphviz, -g      : Use tge GraphViz program to generate one graph
                           snapshot per iteration.
-                           
+
     NOTE: if N networks, A algorithms and S seeds are specified, then the
     script will be executed once for all the N*A*S unique configurations.
 </pre>

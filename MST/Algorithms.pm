@@ -33,9 +33,15 @@ use base 'Exporter';
 use List::Util 'shuffle';
 use Graph;
 
+use Community::Misc;
+
 our $VERSION = '0.1';
 our @EXPORT  = qw(dagrs);
 
+#
+# DA-GRS algorithm on a given network or network snapshot
+# Returns the total number of operations performed in this step
+#
 sub dagrs {
     my $G = shift;
     my $trees = shift;
@@ -52,23 +58,27 @@ sub dagrs {
     my $op = 0;
     foreach my $node (shuffle($G->vertices)) {
         #
-        # Perform the actual community assignment
+        # Perform the actual tree generation process
         #
         if ($period == 1 || ($node % $period) == ($parameters{step} % $period)) {
-            
-            $op = _dagrs_node($G, $trees, $node, %parameters, ope => $op);
+            $op += _dagrs_node($G, $trees, $node, %parameters);
         }
     }
-    print "Did $op operations.\n";
-    print "There is ".(scalar keys %{$trees})." trees in the network.\n";
-    foreach my $k (keys %{$trees}) {
-        print "E=".$trees->{$k}->edges." V=".$trees->{$k}->vertices."\n";
 
+    #
+    # Consistency check
+    #
+    foreach my $k (keys %{$trees}) {
+        die("Error: Tree $k is not a single connected component.")
+            if ((scalar $trees->{$k}->connected_components()) > 1);
     }
-    
-    return $parameters{op} + $op;
+    return $op;
 }
 
+#
+# Implements the DA-GRS algorithm for one node
+# Return the number of operations performed by the node
+#
 sub _dagrs_node {
     my $G = shift;
     my $trees = shift;
@@ -76,7 +86,8 @@ sub _dagrs_node {
     my %parameters = @_;
 
 
-    my $op = $parameters{ope};
+    #my $op = $parameters{ope};
+    my $op = 0;
     my $updated;    
 
     if (exists($parameters{strict}) &&
@@ -100,7 +111,7 @@ sub _dagrs_node {
         
         $updated = 1;
         $op++;
-        print "$n: I\n";
+        #print "$n: I\n";
     }
     #
     # Rule 1 : Link break on non-token side
@@ -165,7 +176,7 @@ sub _dagrs_node {
                 
                 $updated = 1;
                 $op++;
-                print "$n: R1 ($nb)\n";
+                #print "$n: R1 ($nb)\n";
                 last R1;
             }
         }
@@ -188,7 +199,7 @@ sub _dagrs_node {
                 
                 $updated = 1;
                 $op++;
-                print "$n: R2 ($nb)\n";
+                #print "$n: R2 ($nb)\n";
                 last R2;
                 
             }
@@ -235,10 +246,10 @@ sub _dagrs_node {
                     if ($G->has_vertex_attribute($n, "remainder-$nb"));
                 $n_sim = 0.05 if ($n_sim == 0);
                 
-                print "($n,$nb) n_sim = $n_sim, n_sim_ttl = $n_sim_ttl, rand = $rd\n";
+                #print "($n,$nb) n_sim = $n_sim, n_sim_ttl = $n_sim_ttl, rand = $rd\n";
                 
                 if ($rd > $n_sim / $n_sim_ttl) {
-                    print "($n,$nb) skipping merge\n";
+                    #print "($n,$nb) skipping merge\n";
                     #
                     # Increment the remainder for this edge
                     #
@@ -250,9 +261,9 @@ sub _dagrs_node {
                     next R3;
                 }
                 $G->set_vertex_attribute($n, "remainder-$nb", 0);
-                print "($n,$nb) doing merge\n";
+                #print "($n,$nb) doing merge\n";
                 #
-                # End of 
+                # End of merge test
                 #
                 
                 $G->set_vertex_attribute($n, "dagrs_edgelabel-$nb", 2);
@@ -294,7 +305,7 @@ sub _dagrs_node {
                 
                 $updated = 1;
                 $op++;            
-                print "$n: R3 ($nb)\n";
+                #print "$n: R3 ($nb)\n";
                 last R3;
                 
             }
@@ -326,10 +337,11 @@ sub _dagrs_node {
                 
                 $updated = 1;
                 $op++;
-                print "$n: R4 ($nb)\n";
+                #print "$n: R4 ($nb)\n";
                 last R4;
             }
         }
     }
+    #print "Node $n did $op operation in this step.\n" if ($op > 0);
     return $op;
 }
