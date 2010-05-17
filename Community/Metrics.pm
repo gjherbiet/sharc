@@ -44,7 +44,7 @@ sub assignment {
     #
     # Get the community assignment
     #
-    my %C = _community_assignment($G, %parameters);
+    my %C = community_assignment($G, %parameters);
     
     my $str;
     foreach my $c (sort {$a <=> $b} keys %C) {
@@ -72,7 +72,7 @@ sub distribution {
     #
     # Get the community assignment
     #
-    my %C = _community_assignment($G, %parameters);
+    my %C = community_assignment($G, %parameters);
     
     #
     # Create and add elements to the statistics element
