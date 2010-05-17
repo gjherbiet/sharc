@@ -33,7 +33,7 @@ use base 'Exporter';
 use List::Util 'shuffle';
 
 our $VERSION = '0.1';
-our @EXPORT  = qw(get_node_community set_node_community get_originator_distance set_originator_distance);
+our @EXPORT  = qw(get_node_community set_node_community is_bridge get_originator_distance set_originator_distance);
 
 sub get_node_community {
     my $G = shift;
@@ -61,6 +61,19 @@ sub set_node_community {
         $parameters{community_field} : "community";
     
     $G->set_vertex_attribute($n, $community_field, $c);
+}
+
+#
+# Tells if a link is between two communities
+#
+sub is_bridge {
+    my $G = shift;
+    my $u = shift;
+    my $v = shift;
+    my %parameters = @_;
+    
+    return (get_node_community($G, $u, %parameters) !=
+    get_node_community($G, $v, %parameters));
 }
 
 sub get_originator_distance {
