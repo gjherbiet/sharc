@@ -49,6 +49,9 @@ sub graphviz_export {
     #
     my $name = "my_graph";
     $name = $parameters{network_name} if(exists($parameters{network_name}));
+    my $outfile = $name;
+    $outfile = $parameters{logfile} if(exists($parameters{logfile}));
+    
     
     my $GV = GraphViz->new(directed => $G->is_directed(), layout => 'neato',
         overlap => 'scale', name => $name,
@@ -120,7 +123,7 @@ sub graphviz_export {
     # Generate the actual output
     #
     #print $GV->as_text();
-    $GV->as_png($outpath."/".$name."_".$parameters{step}.".png");
+    $GV->as_png($outpath."/".$outfile."_".$parameters{step}.".png");
 }
 
 sub _hsv_color_from_id {
