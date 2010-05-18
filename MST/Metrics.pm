@@ -115,8 +115,10 @@ sub tree_bridges {
             $bridges++ if (is_bridge($G, $u, $v, community_field => "value"));
         }
     }
-    my %communities = community_assignment($G, %parameters);
+    my %communities = community_assignment($G, community_field => "value");
+    
     if ($bridges > 0) {
+        #print "c=".(scalar keys %communities)." n=".$bridges." Q=".(((scalar keys %communities) - 1) / $bridges)."\n";
         return ((scalar keys %communities) - 1) / $bridges;
     }
     else {return -1;}
