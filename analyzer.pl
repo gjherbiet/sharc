@@ -448,7 +448,7 @@ foreach my $m (@metrics) {
                         $str .= " ".$results{$d}{$a}{$m}{time}[$i]->$f();
                     }
                     else {
-                        $str .= " ";
+                        $str .= " ?";
                     }
                 }
             }
