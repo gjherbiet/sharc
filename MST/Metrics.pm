@@ -112,7 +112,7 @@ sub tree_bridges {
     foreach my $t (keys %{$trees}) {
         foreach my $endpoints ($trees->{$t}->edges()) {
             my ($u, $v) = @{$endpoints};
-            $bridges++ if (is_bridge($G, $u, $v, %parameters));
+            $bridges++ if (is_bridge($G, $u, $v, community_field => "value"));
         }
     }
     my %communities = community_assignment($G, %parameters);
@@ -140,7 +140,7 @@ sub mnr {
     foreach my $t (keys %{$trees}) {
         foreach my $endpoints ($trees->{$t}->edges()) {
             my ($u, $v) = @{$endpoints};
-            $TG->add_edge($u, $v) if (!is_bridge($G, $u, $v, %parameters));
+            $TG->add_edge($u, $v) if (!is_bridge($G, $u, $v, community_field => "value"));
         }
     }
     
