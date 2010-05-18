@@ -69,14 +69,23 @@ my $d;                  # Index of the discriminant
 my $time_based = 0;     # Generate time (or iteration) based statistics
 
 my %metrics_functions = (
+    # Community
     "Q"     => "Modularity",
     "WQ"    => "Weighted Modularity",
     "NMI"   => "Normalized Mutual Information",
     "C"     => "Number of communities",
     "S"     => "Maximum community size",
     "I"     => "Average iteration duration",
-    "T"     => "Simulation time",
-    "N"     => "Number of iterations"
+    "ST"    => "Simulation time",
+    "N"     => "Number of iterations",
+    # MST
+    "O"     => "Number of token operations",
+    "TO"    => "Total number of token operations",
+    "T"     => "Number of subtrees",
+    "TS"    => "Maximum tree size",
+    "P"     => "Performance Ratio",
+    "B"     => "Number of tree bridge links",
+    "MNR"   => "Misplaced Nodes Ratio"
 );
 
 #
@@ -187,6 +196,10 @@ FILE: foreach my $file (@files) {
                 #(3) D=17 58.8235294117647 24.3470616659322 62 21 100
                 $regex = "^\\((\\d+)\\) D\\=(\\d+) (\\d+\\.?\\d*) (\\d+\\.?\\d*) (\\d+\\.?\\d*) (\\d+) (\\d+)";
             }
+            elsif ($m eq "TS") {
+                #(3) TD=17 58.8235294117647 24.3470616659322 62 21 100
+                $regex = "^\\((\\d+)\\) TD\\=(\\d+) (\\d+\\.?\\d*) (\\d+\\.?\\d*) (\\d+\\.?\\d*) (\\d+) (\\d+)";
+            }
             #
             # Capture "standard" metrics
             #
@@ -197,7 +210,7 @@ FILE: foreach my $file (@files) {
 
             if ($line =~ /$regex/) {
                 my $res;
-                if ($m eq "S") {
+                if ($m eq "S" || $m eq "TS") {
                     $res = $7;
                 }
                 else {
@@ -207,7 +220,7 @@ FILE: foreach my $file (@files) {
                 #
                 # Save to the requested partial results
                 #
-                if ($time_based && !($m eq "T")) {
+                if ($time_based && !($m eq "ST") && !($m eq "TO")) {
                     $partial_results{$m}{time}[$1] = $res;
                 }
                 if (!exists($partial_results{$m}{max}) ||
@@ -391,7 +404,7 @@ foreach my $m (@metrics) {
     #
     # Skip metrics that don't support time-based results
     #
-    next if ($m eq "T" || $m eq "N");
+    next if ($m eq "ST" || $m eq "N" || $m eq "TO");
     
     #
     # For all other metrics:
@@ -455,7 +468,7 @@ foreach my $m (@metrics) {
     #
     # Skip metrics that don't support time-based results
     #
-    next if ($m eq "T" || $m eq "N");
+    next if ($m eq "ST" || $m eq "N" || $m eq "TO");
     
     #
     # For all other metrics:
