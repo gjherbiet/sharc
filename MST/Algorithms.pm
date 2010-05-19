@@ -217,8 +217,9 @@ sub _dagrs_node {
         my $n_sim_ttl = 0;
         foreach my $nb ($G->neighbours($n)) {
             if ($G->has_vertex_attribute($n, "n_sim-$nb") &&
-                $G->has_vertex_attribute($n, "dagrs_edgelabel-$nb") &&
-                $G->get_vertex_attribute($n, "dagrs_edgelabel-$nb") == 0) {
+                (!$G->has_vertex_attribute($n, "dagrs_edgelabel-$nb") ||
+                ($G->has_vertex_attribute($n, "dagrs_edgelabel-$nb") &&
+                $G->get_vertex_attribute($n, "dagrs_edgelabel-$nb") == 0)) ) {
                 $n_sim_ttl += $G->get_vertex_attribute($n, "n_sim-$nb");
             }
         }
@@ -253,14 +254,16 @@ sub _dagrs_node {
                     #
                     # Increment the remainder for this edge
                     #
-                    my $remainder = 0;
-                    $remainder = $G->get_vertex_attribute($n, "remainder-$nb")
-                        if ($G->has_vertex_attribute($n, "remainder-$nb"));
-                    $G->set_vertex_attribute($n, "remainder-$nb",
-                        ($remainder + $n_sim / $n_sim_ttl));
+                    #my $remainder = 0;
+                    #$remainder = $G->get_vertex_attribute($n, "remainder-$nb")
+                    #    if ($G->has_vertex_attribute($n, "remainder-$nb"));
+                    $G->set_vertex_attribute($n, "remainder-$nb", $n_sim);
                     next R3;
                 }
-                $G->set_vertex_attribute($n, "remainder-$nb", 0);
+                
+                foreach my $n2 ($G->neighbours($n)) {
+                    $G->set_vertex_attribute($n, "remainder-$n2", 0);
+                }
                 #print "($n,$nb) doing merge\n";
                 #
                 # End of merge test
