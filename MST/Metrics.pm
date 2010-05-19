@@ -95,7 +95,8 @@ sub performance_ratio {
     my $trees = shift;
     my %parameters = @_;
     
-    return subtrees($G, $trees, %parameters) / (scalar $G->connected_components());
+    #return subtrees($G, $trees, %parameters) / (scalar $G->connected_components());
+    return (scalar $G->connected_components()) / subtrees($G, $trees, %parameters);
 }
 
 
