@@ -213,6 +213,10 @@ FILE: foreach my $file (@files) {
                 if ($m eq "S" || $m eq "TS") {
                     $res = $7;
                 }
+                # Correct Performance ratio computation
+                #elsif ($m eq "P") {
+                #    $res = 1 / $2;
+                #}
                 else {
                     $res = $2;
                 }
