@@ -64,6 +64,8 @@ sub generate_content_distribution {
     
     foreach my $n ($G->vertices) {
         # Set the actual number of elements in the node
+        # Follows a Pareto distribution
+        # see: http://en.wikipedia.org/wiki/Pareto_distribution
         $G->set_vertex_attribute($n, "content_nb",
             int ($parameters{content_min} * exp (random_exponential(1, $parameters{content_exp}))) );
         
