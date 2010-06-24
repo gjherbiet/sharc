@@ -31,11 +31,12 @@ use warnings;
 use base 'Exporter';
 
 use Graph;              # Graph management library
+use Math::Random qw(random_set_seed random_exponential);       # Better random number generator
 use Data::Dumper;
 
 
 our $VERSION = '0.1';
-our @EXPORT  = qw(generate_content_distribution get_content_distribution);
+our @EXPORT  = qw(generate_content_distribution get_content_distribution content_similarity);
 
 sub generate_content_distribution {
     my $G = shift;
@@ -44,23 +45,32 @@ sub generate_content_distribution {
     #
     # Check that necessary parameters are present
     #
-    unless (exists($parameters{content_nb})) {
-        die("Error: the content distribution generation requires the optional argument content_nb.
-            Please use \"generate_content_distribution(\$G, content_nb => \$n)\".\n");
+    unless (exists($parameters{content_min})) {
+        die("Error: the content distribution generation requires the optional argument content_min.
+            Please use \"generate_content_distribution(\$G, content_min => \$n)\".\n");
     }
+    
+    unless (exists($parameters{content_exp})) {
+        die("Error: the content distribution generation requires the optional argument content_exp.
+            Please use \"generate_content_distribution(\$G, content_exp => \$e)\".\n");
+    }
+    
     unless (exists($parameters{content_types})) {
         die("Error: the content distribution generation requires the optional argument content_types.
             Please use \"generate_content_distribution(\$G, contencontent_typest_nb => \$t)\".\n");
     }
     
+    random_set_seed(($parameters{seed} + 1 , 13*$parameters{seed} + 7));
+    
     foreach my $n ($G->vertices) {
         # Set the actual number of elements in the node
-        $G->set_vertex_attribute($n, "content_nb", int(rand($parameters{content_nb})) );
+        $G->set_vertex_attribute($n, "content_nb",
+            int ($parameters{content_min} * exp (random_exponential(1, $parameters{content_exp}))) );
         
         # Sets the distribution
         my @distribution;
         for (my $t=0; $t < $parameters{content_types}; $t++) {
-            $distribution[$t] = rand();
+            $distribution[$t] = exp ( random_exponential(1, 1.5) );
         }
         # Normalize the distribtion
         @distribution = map( $_ / eval(join '+', @distribution), @distribution);
@@ -73,7 +83,6 @@ sub generate_content_distribution {
 sub get_content_distribution {
     my $G = shift;
     my $n = shift;
-    my %parameters = @_;
     
     my $nb = $G->get_vertex_attribute($n, "content_nb");
     my $dist = $G->get_vertex_attribute($n, "content_dist");
@@ -81,3 +90,48 @@ sub get_content_distribution {
     return ($nb, $dist);
 }
 
+sub content_similarity {
+    my $G = shift;
+    my $n1 = shift;
+    my $n2 = shift;
+    
+    #
+    # Retrieve the distribution of both nodes
+    #
+    my ($nb1, $dist1) = get_content_distribution($G, $n1);
+    my ($nb2, $dist2) = get_content_distribution($G, $n2);
+
+    #
+    # Return 1 - Hellinger_distance of the two dists
+    # so the metric is in [0;1] (as the stability metric), 1 being the best
+    #
+    if ($n1 == $n2) {
+        return 1;
+    }
+    else {
+        return 1 - _hellinger_distance($dist1, $dist2);
+    }
+}
+
+#
+# Compute the Hellinger distance of two distributions
+# see: http://en.wikipedia.org/wiki/Hellinger_distance
+#
+sub _hellinger_distance {
+    my $dist1 = shift;
+    my $dist2 = shift;
+    
+    #
+    # First compute the Bhattacharyya coefficient
+    # see: http://en.wikipedia.org/wiki/Bhattacharyya_distance
+    #
+    my $bc = 0;
+    for (my $t=0; $t<(scalar @{$dist1}); $t++) {
+        $bc += sqrt( $dist1->[$t] * $dist2->[$t] ) if ($dist2->[$t]);
+    }
+    
+    #
+    # Now compute the Hellinger distance, based on the Bhattacharyya coefficient
+    #
+    return sqrt(1 - $bc);
+}
