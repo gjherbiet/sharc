@@ -12,8 +12,12 @@
 # Except the cleaner also
 !log-cleaner.sh
 
-# Do not store generated netwoks
-nets/
+# Do not store generated networks
+# except some GML files and scripts used to generate LFR networks
+nets/*
+!nets/*.gml
+!nets/*.sh
+!nets/*flags*.dat
 
 # Do not store log and output dirs
 log*/
