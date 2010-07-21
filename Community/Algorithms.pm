@@ -427,10 +427,36 @@ sub ecdns_node {
     my %highest_degree;
     
     #
+    # Set of considered nodes is depending on the "diameter" parameter
+    #
+    
+    # We will need the set of neighbors in any case
+    my @considered_nodes = $G->neighbours($n);
+    
+    # Add nodes from each heard community within a given distance
+    # TODO: limit distance
+    if (exists($parameters{diameter}) && $parameters{diameter} != 1) {
+        
+        # Get all the heard communities
+        my %NC;
+        foreach my $nb (@considered_nodes) {
+            $NC{get_node_community($G, $nb, %parameters)} = 1;
+        }
+        
+        # Add all the connected (even indirectly form a hear community)
+        my @reachable = $G->all_neighbours(@considered_nodes);
+        foreach my $r (@reachable) {
+            if (exists($NC{get_node_community($G, $r, %parameters)})) {
+                push (@considered_nodes, $r);
+            }
+        }
+    }
+    
+    #
     # Increment the score based on the neighbors current community and
     # neighborhood similarity metric
     #
-    foreach my $nb ($G->neighbours($n)) {
+    foreach my $nb (@considered_nodes) {
         my $s;
         if (!exists($parameters{unweighted})) {
             # 
@@ -736,11 +762,15 @@ sub _neighborhood_similarity {
     
     my @neighb1 = $G->neighbours($n1);
     
-    unless (grep(/^$n2$/, @neighb1)) {
-        die ("Error: computing neighborhood similarity for $n1 with $n2, which is a non-neighbor node.\n");
-    }
+    #unless (grep(/^$n2$/, @neighb1)) {
+    #    die ("Error: computing neighborhood similarity for $n1 with $n2, which is a non-neighbor node.\n");
+    #}
     my @neighb2 = $G->neighbours($n2);
-
+    
+    if (scalar (@neighb1) + scalar (@neighb2) == 0) {
+        die ("Error: computing neighborhood similarity for $n1 and $n2, that both have degree 0.\n");
+    }
+    
     #print "$n1: ".join(" ", @neighb1)."\n";
     #print "$n2: ".join(" ", @neighb2)."\n";
 
