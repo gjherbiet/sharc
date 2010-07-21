@@ -404,15 +404,6 @@ sub ecdns_node {
     my $n = shift;
     my %parameters = @_;
     
-    #
-    # Construct the cdf of link weigths if required
-    #
-    my @dist;
-    if (!exists($parameters{unweighted})) {
-        @dist = _weight_dist($G, $n, %parameters);
-        #print "".join(" ", @dist)." l:".(scalar @dist)."\n";
-    }
-    
     my $community_field = exists($parameters{community_field}) ?
         $parameters{community_field} : "community";
     
@@ -434,11 +425,10 @@ sub ecdns_node {
     my @considered_nodes = $G->neighbours($n);
     
     # Add nodes from each heard community within a given distance
-    # TODO: limit distance
     if (exists($parameters{diameter}) && $parameters{diameter} != 1) {
         
         # TODO: make this work with weight functions
-        $parameters{unweighted} = 1 unless(exists($parameters{unweighted}));
+        #$parameters{unweighted} = 1 unless(exists($parameters{unweighted}));
         
         # Get all the heard communities
         my %NC;
@@ -451,7 +441,7 @@ sub ecdns_node {
         my @reachable = @considered_nodes;
         unless ($parameters{diameter} == 0) {
             for (my $d = 2; $d <= $parameters{diameter}; $d++) {
-                print "n=$n, d=".($d-1).": ".join(' ', @reachable)."\n";
+                #print "n=$n, d=".($d-1).": ".join(' ', @reachable)."\n";
                 my @reachable_neighbors;
                 foreach my $rn ($G->neighbours(@reachable)) {
                     if (exists($NC{get_node_community($G, $rn, %parameters)})) {
@@ -461,7 +451,7 @@ sub ecdns_node {
                 }
                 @reachable = @reachable_neighbors;
             }
-            print "n=$n, d=$parameters{diameter}: ".join(' ', @reachable)."\n";
+            #print "n=$n, d=$parameters{diameter}: ".join(' ', @reachable)."\n";
         }
         else {
             # if diameter is set to 0, then don't look for any limitation
@@ -472,6 +462,15 @@ sub ecdns_node {
                 }
             }
         }
+    }
+    
+    #
+    # Construct the cdf of link weigths if required
+    #
+    my @dist;
+    if (!exists($parameters{unweighted})) {
+        @dist = _weight_dist($G, $n, \@considered_nodes, %parameters);
+        #print "".join(" ", @dist)." l:".(scalar @dist)."\n";
     }
     
     #
@@ -486,7 +485,7 @@ sub ecdns_node {
             # of the link weights
             #
             my $index = 0;
-            my $weight = $G->get_edge_attribute($n, $nb, "weight");
+            my $weight = path_weight($G, $n, $nb, %parameters);
             ++$index until $dist[$index] == $weight or $index > $#dist;
             
             #
@@ -806,12 +805,13 @@ sub _neighborhood_similarity {
 sub _weight_dist {
     my $G = shift;
     my $n = shift;
+    my $considered_nodes = shift;
     my %parameters = @_;
     
     my @dist;
     
-    foreach my $nb ($G->neighbours($n)) {
-        push(@dist, $G->get_edge_attribute($n, $nb, "weight"));
+    foreach my $nb (@{$considered_nodes}) {
+        push (@dist, path_weight($G, $n, $nb, %parameters));
     }
     @dist = reverse sort @dist;
     return @dist;

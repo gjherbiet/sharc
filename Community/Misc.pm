@@ -33,7 +33,12 @@ use base 'Exporter';
 use List::Util 'shuffle';
 
 our $VERSION = '0.1';
-our @EXPORT  = qw(get_node_community set_node_community is_bridge get_originator_distance set_originator_distance);
+our @EXPORT  = qw(  get_node_community 
+                    set_node_community
+                    is_bridge
+                    get_originator_distance
+                    set_originator_distance
+                    path_weight);
 
 sub get_node_community {
     my $G = shift;
@@ -106,3 +111,36 @@ sub set_originator_distance {
     
     $G->set_vertex_attribute($n, $od_field, $d);
 }
+
+#
+# Returns the path weight between two nodes, ie :
+# - the edge weight if the two nodes are direct neighbors
+# - the path min-weight ("weakest link") if the two nodes are connected
+# - 0 if they are disconnected
+#
+sub path_weight {
+    my $G = shift;
+    my $u = shift;
+    my $v = shift;
+    my %parameters = @_;
+    
+    # The current node and the considered node are neighbors
+    # use the link weight to consctruct the distribution
+    if ($G->has_edge($u, $v)) {
+        return $G->get_edge_attribute($u, $v, "weight");
+    }
+    # Otherwise the two nodes are undirect neighbors, use the weakest
+    # weight on the path as weight
+    # NOTE: this assume "positive" weight measure (higher weight is better...)
+    else {
+        my @path = $G->SP_Dijkstra($u, $v);
+        return 0 unless (scalar @path > 0);
+        my $min_weight = 2**32;
+        for (my $i = 0; $i < (scalar @path)-2; $i++) {
+            my $weight = $G->get_edge_attribute($path[$i], $path[$i+1], "weight");
+            $min_weight = $weight if ($weight < $min_weight);
+        }
+        return $min_weight;
+    }
+}
+
