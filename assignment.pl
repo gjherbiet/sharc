@@ -191,7 +191,7 @@ foreach my $network (@networks) {
         # Algorithm extra parameters
         #
         my %parameters;
-        set_extra_parameters(\%parameters, \@extra);
+        my $extra_string = set_extra_parameters(\%parameters, \@extra);
         $parameters{network_name} = $network_name;
         
         #
@@ -210,8 +210,11 @@ foreach my $network (@networks) {
             #
             $parameters{logfile} = $network_name."_";
             $parameters{logfile} .= $tree_algo."-" if ($tree_algo && defined(&{$tree_algo}));
-            $parameters{logfile} .= $algo."_".$seed;
+            $parameters{logfile} .= $algo.$extra_string."_";
+            $parameters{logfile} .= $seed;
             my $logfile = $logpath."/".$parameters{logfile}.".log";
+            
+            die("$logfile\n");
             
             #
             # Skip if the logfile already exists
@@ -464,12 +467,32 @@ sub set_extra_parameters {
     my $parameters_ref = shift;
     my $extra_ref = shift;
     
+    my %extras;
+    my %short_extras;
+    
     foreach my $e (@{$extra_ref}) {
         my ($key, $val) = split('\=', $e, 2);
         $val = "0.0" if (defined($val) && $val eq "0");
         $val = 1 unless ($val);
         $parameters_ref->{$key} = $val;
+        $extras{$key} = $val;
     }
+    
+    # Generate shorter version of the extra parameters hash for the
+    # output string
+    foreach my $key (sort keys %extras) {
+        my $len = 3;
+        while (exists($short_extras{substr($key, 0, $len)})) {
+            $len++;
+        }
+        $short_extras{substr($key, 0, $len)} = $extras{$key};
+    }
+    
+    my $str = "";
+    foreach my $k (sort keys %short_extras) {
+        $str .= "-".$k."(".$short_extras{$k}.")";
+    }
+    return $str;
 }
 
 #
