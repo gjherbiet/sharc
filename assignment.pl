@@ -1,4 +1,4 @@
-#!/usr/bin/env perl -w
+#!/usr/bin/perl -w
 
 ##############################################################################
 # File   : assignment.pl
@@ -213,8 +213,6 @@ foreach my $network (@networks) {
             $parameters{logfile} .= $algo.$extra_string."_";
             $parameters{logfile} .= $seed;
             my $logfile = $logpath."/".$parameters{logfile}.".log";
-            
-            die("$logfile\n");
             
             #
             # Skip if the logfile already exists
