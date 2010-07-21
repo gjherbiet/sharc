@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>Utils/Content.pm</string>
+	<string>Community/Algorithms.pm</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -21,12 +21,70 @@
 	<integer>201</integer>
 	<key>metaData</key>
 	<dict>
-		<key>Utils/Content.pm</key>
+		<key>Community/Algorithms.pm</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
 				<integer>26</integer>
+				<key>line</key>
+				<integer>446</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>475</integer>
+		</dict>
+		<key>Community/Metrics.pm</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>5</integer>
+				<key>line</key>
+				<integer>224</integer>
+			</dict>
+			<key>columnSelection</key>
+			<false/>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>189</integer>
+			<key>selectFrom</key>
+			<dict>
+				<key>column</key>
+				<integer>4</integer>
+				<key>line</key>
+				<integer>220</integer>
+			</dict>
+			<key>selectTo</key>
+			<dict>
+				<key>column</key>
+				<integer>5</integer>
+				<key>line</key>
+				<integer>224</integer>
+			</dict>
+		</dict>
+		<key>Community/Misc.pm</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>37</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>15</integer>
+		</dict>
+		<key>Utils/Content.pm</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
 				<key>line</key>
 				<integer>36</integer>
 			</dict>
@@ -70,30 +128,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>67</integer>
+				<integer>39</integer>
 				<key>line</key>
-				<integer>243</integer>
+				<integer>470</integer>
 			</dict>
-			<key>columnSelection</key>
-			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>303</integer>
-			<key>selectFrom</key>
-			<dict>
-				<key>column</key>
-				<integer>41</integer>
-				<key>line</key>
-				<integer>243</integer>
-			</dict>
-			<key>selectTo</key>
-			<dict>
-				<key>column</key>
-				<integer>67</integer>
-				<key>line</key>
-				<integer>243</integer>
-			</dict>
+			<integer>429</integer>
 		</dict>
 		<key>dynamic8.pl</key>
 		<dict>
@@ -173,6 +215,9 @@
 		<string>assignment.pl</string>
 		<string>Utils/Read.pm</string>
 		<string>Utils/Content.pm</string>
+		<string>Community/Algorithms.pm</string>
+		<string>Community/Metrics.pm</string>
+		<string>Community/Misc.pm</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<false/>
@@ -211,6 +256,6 @@
 		</dict>
 	</dict>
 	<key>windowFrame</key>
-	<string>{{0, 72}, {960, 1106}}</string>
+	<string>{{619, 72}, {821, 806}}</string>
 </dict>
 </plist>

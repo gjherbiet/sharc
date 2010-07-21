@@ -435,8 +435,10 @@ sub ecdns_node {
     
     # Add nodes from each heard community within a given distance
     # TODO: limit distance
-    # TODO: make this work with weight functions
     if (exists($parameters{diameter}) && $parameters{diameter} != 1) {
+        
+        # TODO: make this work with weight functions
+        $parameters{unweighted} = 1 unless(exists($parameters{unweighted}));
         
         # Get all the heard communities
         my %NC;
@@ -444,11 +446,30 @@ sub ecdns_node {
             $NC{get_node_community($G, $nb, %parameters)} = 1;
         }
         
-        # Add all the connected (even indirectly form a hear community)
-        my @reachable = $G->all_neighbours(@considered_nodes);
-        foreach my $r (@reachable) {
-            if (exists($NC{get_node_community($G, $r, %parameters)})) {
-                push (@considered_nodes, $r);
+        # Add all connected nodes within diameter d of one of the heard
+        # communities to the set of considered nodes
+        my @reachable = @considered_nodes;
+        unless ($parameters{diameter} == 0) {
+            for (my $d = 2; $d <= $parameters{diameter}; $d++) {
+                print "n=$n, d=".($d-1).": ".join(' ', @reachable)."\n";
+                my @reachable_neighbors;
+                foreach my $rn ($G->neighbours(@reachable)) {
+                    if (exists($NC{get_node_community($G, $rn, %parameters)})) {
+                        push(@reachable_neighbors, $rn);
+                        push(@considered_nodes, $rn);
+                    }
+                }
+                @reachable = @reachable_neighbors;
+            }
+            print "n=$n, d=$parameters{diameter}: ".join(' ', @reachable)."\n";
+        }
+        else {
+            # if diameter is set to 0, then don't look for any limitation
+            my @reachable = $G->all_neighbours(@considered_nodes);
+            foreach my $r (@reachable) {
+                if (exists($NC{get_node_community($G, $r, %parameters)})) {
+                    push (@considered_nodes, $r);
+                }
             }
         }
     }
