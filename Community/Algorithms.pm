@@ -435,6 +435,7 @@ sub ecdns_node {
     
     # Add nodes from each heard community within a given distance
     # TODO: limit distance
+    # TODO: make this work with weight functions
     if (exists($parameters{diameter}) && $parameters{diameter} != 1) {
         
         # Get all the heard communities
