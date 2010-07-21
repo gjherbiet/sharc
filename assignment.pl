@@ -465,8 +465,9 @@ sub set_extra_parameters {
     my $extra_ref = shift;
     
     foreach my $e (@{$extra_ref}) {
-        my ($key, $val) = split('\=', $e);
-        $val = 1 unless ($val || $val eq "0");
+        my ($key, $val) = split('\=', $e, 2);
+        $val = "0.0" if (defined($val) && $val eq "0");
+        $val = 1 unless ($val);
         $parameters_ref->{$key} = $val;
     }
 }
