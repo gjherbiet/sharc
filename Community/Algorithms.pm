@@ -422,23 +422,20 @@ sub ecdns_node {
     #
     
     # We will need the set of neighbors in any case
-    my @considered_nodes = $G->neighbours($n);
+    my %considered_nodes = map { $_ => 1} $G->neighbours($n);
     
     # Add nodes from each heard community within a given distance
     if (exists($parameters{diameter}) && $parameters{diameter} != 1) {
         
-        # TODO: make this work with weight functions
-        #$parameters{unweighted} = 1 unless(exists($parameters{unweighted}));
-        
         # Get all the heard communities
         my %NC;
-        foreach my $nb (@considered_nodes) {
+        foreach my $nb (keys %considered_nodes) {
             $NC{get_node_community($G, $nb, %parameters)} = 1;
         }
         
         # Add all connected nodes within diameter d of one of the heard
         # communities to the set of considered nodes
-        my @reachable = @considered_nodes;
+        my @reachable = keys %considered_nodes;
         unless ($parameters{diameter} == 0) {
             for (my $d = 2; $d <= $parameters{diameter}; $d++) {
                 #print "n=$n, d=".($d-1).": ".join(' ', @reachable)."\n";
@@ -446,7 +443,7 @@ sub ecdns_node {
                 foreach my $rn ($G->neighbours(@reachable)) {
                     if (exists($NC{get_node_community($G, $rn, %parameters)})) {
                         push(@reachable_neighbors, $rn);
-                        push(@considered_nodes, $rn);
+                        $considered_nodes{$rn} = $d;
                     }
                 }
                 @reachable = @reachable_neighbors;
@@ -455,10 +452,11 @@ sub ecdns_node {
         }
         else {
             # if diameter is set to 0, then don't look for any limitation
-            my @reachable = $G->all_neighbours(@considered_nodes);
+            my @reachable = $G->all_neighbours(keys %considered_nodes);
             foreach my $r (@reachable) {
                 if (exists($NC{get_node_community($G, $r, %parameters)})) {
-                    push (@considered_nodes, $r);
+                    $considered_nodes{$r} = 
+                        scalar $G->SP_Dijkstra($n, $r);
                 }
             }
         }
@@ -469,7 +467,8 @@ sub ecdns_node {
     #
     my @dist;
     if (!exists($parameters{unweighted})) {
-        @dist = _weight_dist($G, $n, \@considered_nodes, %parameters);
+        my @cn = keys %considered_nodes;
+        @dist = _weight_dist($G, $n, \@cn, %parameters);
         #print "".join(" ", @dist)." l:".(scalar @dist)."\n";
     }
     
@@ -477,7 +476,7 @@ sub ecdns_node {
     # Increment the score based on the neighbors current community and
     # neighborhood similarity metric
     #
-    foreach my $nb (@considered_nodes) {
+    foreach my $nb (keys %considered_nodes) {
         my $s;
         if (!exists($parameters{unweighted})) {
             # 
@@ -492,7 +491,7 @@ sub ecdns_node {
             # The cdf of the link
             #
             my $cdf = ((scalar @dist) - $index) / (scalar @dist);
-            my $ns =_neighborhood_similarity($G, $n, $nb);
+            my $ns =_neighborhood_similarity($G, $n, $nb) / $considered_nodes{$nb};
             if (exists($parameters{alt})) {
                 $s =  $ns ** ((1 / $cdf) - 1);
             }
