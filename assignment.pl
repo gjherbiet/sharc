@@ -40,9 +40,6 @@ use Graph;                  # Graph management library
 use Utils::Read;            # Read graphs from various formats
 use Community::Algorithms;  # Community algorithms
 use Community::Metrics;     # Community metrics
-use MST::Algorithms;        # MST algorithms
-use MST::Metrics;           # MST metrics
-use Utils::Stability;       # Stability metrics
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
@@ -139,8 +136,12 @@ if ( $tree_algo && defined(&{$tree_algo})) {
 else {set_metrics("NMI");}
 
 # Conditional package loading
-if ($ubigraph) {use Utils::Ubigraph;} # Output to dynamic graph visualization software
-if ($graphviz) {use Utils::GraphViz;}  # Output to snapshot graph visualization software
+eval {require MST::Algorithms} if ($tree_algo);        # MST algorithms
+eval {require MST::Metrics} if ($tree_algo);           # MST metrics
+eval {require Utils::Stability} if ($stability);       # Stability metrics
+
+eval {require Utils::Ubigraph} if ($ubigraph); # Output to dynamic graph visualization software
+eval {require Utils::GraphViz} if ($graphviz); # Output to snapshot graph visualization software
 
 #-----------------------------------------------------------------------------
 
