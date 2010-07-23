@@ -346,6 +346,8 @@ sub _parse_dgs_v12 {
     my $file = shift;
     my %parameters = @_;
     
+    #print "Parsing file $file using DGS v.1 or v.2.\n";
+    
     #
     # Create a new graph or use the one specified in the parameters
     #
@@ -389,13 +391,16 @@ sub _parse_dgs_v12 {
         # Process the information of the current step
         #
         elsif ($in_current_step) {
+            
+            #print "entering current step = $in_current_step\n";
+            
             #an "0" 42.739232029808754 248.5905818079476
             #cn "1" 255.71367733451382 119.91483191177676
-            if (/^(a|c)n "(\d+)" (\d+\.?\d*) (\d+\.?\d*)/) {
-                #print "$1 $2 $3 $4\n";
+            if (/^(a|c)n "(\d+)" (\d+\.?\d*)?\s*(\d+\.?\d*)?/) {
+                #print "$1 n $2 $3 $4\n";
                 $G->add_vertex(($2+1)) if ($1 eq "a");
-                $G->set_vertex_attribute(($2+1), "x", $3);
-                $G->set_vertex_attribute(($2+1), "y", $4);
+                $G->set_vertex_attribute(($2+1), "x", $3) if (defined $3);
+                $G->set_vertex_attribute(($2+1), "y", $4) if (defined $4);
             }
             #dn "0"
             elsif (/^dn "(\d+)"$/) {
@@ -403,16 +408,21 @@ sub _parse_dgs_v12 {
             }
             #ae "38:41:ieee802.11b" "37" "40"
             #ce "38:41:ieee802.11b" "37" "40"
-            elsif (/^(a|c)e "(.*)" "(\d+)" "(\d+)"$/) {
-                #print "$1 $2 $3 $4\n";
+            elsif (/^(a|c)e "(.*)" "(\d+)" "(\d+)"/) {
+                #print "$1 e $2 $3 $4\n";
                 $G->add_weighted_edge(($3+1), ($4+1), 1) if ($1 eq "a");
                 $G->set_edge_attribute(($3+1), ($4+1), "ae", $step);
                 $G->set_edge_attribute(($3+1), ($4+1), "name", $2);
             }
             #de "59:85:ieee802.11b"
             elsif (/^de "((\d+):(\d+):.*)"$/) {
-                #print "$1 $2 $3\n";
+                #print "de $1 $2 $3\n";
                 $G->delete_edge($2, $3);
+            }
+            #de "1__938"
+            elsif (/^de "((\d+)__(\d+))"$/) {
+                #print "de $1 $2 $3\n";
+                $G->delete_edge(($2+1), ($3+1));
             }
         }
     }
