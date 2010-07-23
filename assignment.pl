@@ -280,6 +280,7 @@ foreach my $network (@networks) {
                 #
                 $parameters{step} = $step;
                 #print "$step\n";
+                verbose(">> Step $step.");
                 
                 #
                 # Update the link weights if a particular stability
