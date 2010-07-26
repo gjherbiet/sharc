@@ -68,6 +68,7 @@ my @algos;              # List of algorithms to use
 my $tree_algo;          # MST algorithm to use
 my @metrics;            # List of metrics to compute
 my $stability;          # Stability criterion to use
+my $force;              # Force overwriting existing log file
 my $logpath = "log";    # Output directory for the simulation results
 my $outpath = "out";    # Output directory for the other generated files
 my @extra;              # List of extra arguments passed to the algorithm
@@ -107,6 +108,7 @@ my $res = GetOptions(
     #'help|h'       => sub { pod2usage( -exitval => 1, -verbose => 2 ); },
     'help|h'        => sub { USAGE( exitval => 0 ); },
     'version'       => sub { VERSION_MESSAGE(); exit(0); },
+    'force+'        => \$force,
 
     'network|n=s'   => \@networks,
     'rand|r=s'      => sub { set_random( $_[1] ) },
@@ -218,7 +220,7 @@ foreach my $network (@networks) {
             #
             # Skip if the logfile already exists
             #
-            if (-f $logfile) {
+            if (-f $logfile && !$force) {
                 verbose(">> $logfile already exists, skipping this run.");
                 next;
             }
@@ -521,7 +523,7 @@ sub USAGE {
         $parameters{exitval} : 0;
     
     print <<EOF;
-$COMMAND [-h|--help] [-v|--verbose] [--version]
+$COMMAND [-h|--help] [-v|--verbose] [--version] [--force]
     (-n|--network network_file [-n|--network network_file_2 ...] | -r|--rand N,k,s)
     -a|--algorithm algorithm_name [-a|--algorithm algorithm_name ...]
     [-e|--extra parameter[=value] [-e|--extra parameter[=value] ...]]
@@ -532,6 +534,7 @@ $COMMAND [-h|--help] [-v|--verbose] [--version]
     --help, -h          : Print this help, then exit
     --version           : Print the script version, then exit
     --verbose, -v       : Enable user information output to STDOUT
+    --force             : Force writing over existing logfile
 
     --network, -n       : Path to network description file. The kind of the
                           network file is guessed and properly interpreted.
