@@ -136,12 +136,12 @@ if ( $tree_algo && defined(&{$tree_algo})) {
 else {set_metrics("NMI");}
 
 # Conditional package loading
-eval {use MST::Algorithms} if ($tree_algo);        # MST algorithms
-eval {use MST::Metrics} if ($tree_algo);           # MST metrics
-eval {use Utils::Stability} if ($stability);       # Stability metrics
+if ($tree_algo) {require MST::Algorithms; import MST::Algorithms;}      # MST algorithms
+if ($tree_algo) {require MST::Metrics; import MST::Metrics;}            # MST metrics
+if ($stability) {require Utils::Stability; import Utils::Stability;}    # Stability metrics
 
-eval {use Utils::Ubigraph} if ($ubigraph); # Output to dynamic graph visualization software
-eval {use Utils::GraphViz} if ($graphviz); # Output to snapshot graph visualization software
+if ($ubigraph)  {require Utils::Ubigraph; import Utils::Ubigraph;}  # Output to dynamic graph visualization software
+if ($graphviz)  {require Utils::GraphViz; import Utils::GraphViz;}  # Output to snapshot graph visualization software
 
 #-----------------------------------------------------------------------------
 
