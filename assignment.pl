@@ -78,6 +78,7 @@ my $rand_N;             # Number of nodes for random graphs
 my $rand_s;             # Seed for random graphs
 my $ubigraph;           # Use Urbigraph for output
 my $graphviz;           # Use GraphViz for output
+my $graphviz_period;    # GraphViz output generation period
 
 my %metrics_functions = (
     # Community
@@ -121,8 +122,9 @@ my $res = GetOptions(
     'seed|s=s'      => sub { set_seeds( $_[1] ) },
     'extra|e=s'     => \@extra,
     'ubigraph|u+'   => \$ubigraph,
-    'graphviz|g+'   => \$graphviz,
+    'graphviz|g:1'   => \$graphviz,
 );
+
 
 #pod2usage(-exitval => 1, -verbose => 2)
 unless ( $res && ( scalar @networks ) > 0 && ( scalar @algos ) > 0 ) {
@@ -138,12 +140,12 @@ if ( $tree_algo && defined(&{$tree_algo})) {
 else {set_metrics("NMI");}
 
 # Conditional package loading
-if ($tree_algo) {require MST::Algorithms; import MST::Algorithms;}      # MST algorithms
-if ($tree_algo) {require MST::Metrics; import MST::Metrics;}            # MST metrics
-if ($stability) {require Utils::Stability; import Utils::Stability;}    # Stability metrics
+if ($tree_algo) {require MST::Algorithms; import MST::Algorithms qw(:DEFAULT);}      # MST algorithms
+if ($tree_algo) {require MST::Metrics; import MST::Metrics qw(:DEFAULT);}            # MST metrics
+if ($stability) {require Utils::Stability; import Utils::Stability qw(:DEFAULT);}    # Stability metrics
 
-if ($ubigraph)  {require Utils::Ubigraph; import Utils::Ubigraph;}  # Output to dynamic graph visualization software
-if ($graphviz)  {require Utils::GraphViz; import Utils::GraphViz;}  # Output to snapshot graph visualization software
+if ($ubigraph)  {require Utils::Ubigraph; import Utils::Ubigraph qw(:DEFAULT);}  # Output to dynamic graph visualization software
+if ($graphviz)  {require Utils::GraphViz; import Utils::GraphViz qw(:DEFAULT);}  # Output to snapshot graph visualization software
 
 #-----------------------------------------------------------------------------
 
@@ -336,16 +338,6 @@ foreach my $network (@networks) {
                 print LOG "($step) I=".($end_iter-$start_iter)."\n";
                 
                 #
-                # Update the graph if it is dynamic, or simply 
-                # increment iteration for static graphs
-                #
-                if ($max_steps) {
-                    ($G, $step, $network_name) = 
-                    parse($network, graph => $G, step => $step);
-                }
-                else {$step++;}
-                
-                #
                 # Update the Ubigraph object
                 #
                 if ($ubigraph) {
@@ -357,8 +349,19 @@ foreach my $network (@networks) {
                 # Generate a new GraphViz snapshot
                 #
                 if ($graphviz) {
-                    graphviz_export($G, $outpath, %parameters);
+                    graphviz_export($G, $outpath, %parameters)
+                        if ($step % $graphviz == 0);
                 }
+                
+                #
+                # Update the graph if it is dynamic, or simply 
+                # increment iteration for static graphs
+                #
+                if ($max_steps) {
+                    ($G, $step, $network_name) = 
+                    parse($network, graph => $G, step => $step);
+                }
+                else {$step++;}
 
             }
             if ( $tree_algo && defined(&{$tree_algo}) ) {
@@ -529,7 +532,7 @@ $COMMAND [-h|--help] [-v|--verbose] [--version] [--force]
     [-e|--extra parameter[=value] [-e|--extra parameter[=value] ...]]
     [--stability criterion] [-m|--metrics MET [-m|--metrics MET ...]]
     [-l|--logpath path_to_log_dir] [-o|--outpath path_to_out_dir]
-    [-s|--seed n|n..m|n..m+k] [-u|--ubigraph] [-g|--graphviz]
+    [-s|--seed n|n..m|n..m+k] [-u|--ubigraph] [-g|--graphviz [period]]
     
     --help, -h          : Print this help, then exit
     --version           : Print the script version, then exit
@@ -573,8 +576,11 @@ $COMMAND [-h|--help] [-v|--verbose] [--version] [--force]
     --ubigraph, -u      : Use UbiGraph for dynamic 3D visualization of
                           assignment process
     --graphviz, -g      : Use tge GraphViz program to generate one graph
-                          snapshot per iteration.
-                               
+                          snapshot per iteration. If the optionnal "period"
+                          value is passed, output is only generated every
+                          "period" iteration (useful to limit the number of
+                          generated files with dynamic networks)
+
     NOTE: if N networks, A algorithms and S seeds are specified, then the
     script will be executed once for all the N*A*S unique configurations.
 EOF
