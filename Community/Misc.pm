@@ -33,12 +33,38 @@ use base 'Exporter';
 use List::Util 'shuffle';
 
 our $VERSION = '0.1';
-our @EXPORT  = qw(  get_node_community 
+our @EXPORT  = qw(  node_info
+                    get_node_community 
                     set_node_community
                     is_bridge
                     get_originator_distance
                     set_originator_distance
                     path_weight);
+
+sub node_info {
+    my $G = shift;
+    my $n = shift;
+    my %parameters = @_;
+    
+    my $str = "$n<".get_node_community($G, $n, %parameters).">";
+    $str .= "(".get_originator_distance($G, $n, %parameters).")"
+        if $G->has_vertex_attribute($n, "originator_distance");
+        
+    return $str;
+}
+
+sub neighborhood_info {
+    my $G = shift;
+    my $n = shift;
+    my %parameters = @_;
+    
+    my $str;
+    foreach my $nb ($G->neighbours($n)) {
+        $str .= node_info($G, $nb, %parameters)." ";
+    }
+    return $str;
+}
+
 
 sub get_node_community {
     my $G = shift;
