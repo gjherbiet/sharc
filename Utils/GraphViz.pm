@@ -52,9 +52,9 @@ sub graphviz_export {
     my $outfile = $name;
     $outfile = $parameters{logfile} if(exists($parameters{logfile}));
     
-    
+    $name =~ s/-/_/g;
     my $GV = GraphViz->new(directed => $G->is_directed(), layout => 'neato',
-        overlap => 'scale', name => $name,
+        overlap => 'true', name => $name,
         node => { style => 'filled', shape => 'circle',  height => '.75', width => '.75'});
     
     #
@@ -87,6 +87,12 @@ sub graphviz_export {
             $attributes{width} = 0.1;
             $attributes{height} = 0.1;
         }
+        if ($G->has_vertex_attribute($n, "x") && $G->has_vertex_attribute($n, "x")) {
+            my $x = $G->get_vertex_attribute($n, "x") / 10;
+            my $y = $G->get_vertex_attribute($n, "y") / 10;
+            $attributes{pos} = "$x,$y!";
+        }
+        
         $GV->add_node($n, %attributes);
     }
     
@@ -124,7 +130,7 @@ sub graphviz_export {
     #
     #print $GV->as_text();
     $GV->as_png($outpath."/".$outfile."_".$parameters{step}.".png");
-}
+    }
 
 sub _hsv_color_from_id {
     my $G =  shift;
