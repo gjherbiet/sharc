@@ -2,39 +2,145 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>currentDocument</key>
-	<string>assignment.pl</string>
 	<key>documents</key>
 	<array>
+		<dict>
+			<key>filename</key>
+			<string>analyzer.pl</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>assignment.pl</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>boids.pl</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>classic-tree.pl</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>classic.pl</string>
+		</dict>
 		<dict>
 			<key>expanded</key>
 			<true/>
 			<key>name</key>
-			<string>sharc</string>
+			<string>Community</string>
 			<key>regexFolderFilter</key>
 			<string>!.*/(\.[^/]*|CVS|_darcs|_MTN|\{arch\}|blib|.*~\.nib|.*\.(framework|app|pbproj|pbxproj|xcode(proj)?|bundle))$</string>
 			<key>sourceDirectory</key>
-			<string></string>
+			<string>Community</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>dynamic.pl</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>dynamic8.pl</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>er.pl</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>gn-tree.pl</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>gn.pl</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>gpl-3.0.texi</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>lfr.pl</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>log-cleaner.sh</string>
+		</dict>
+		<dict>
+			<key>expanded</key>
+			<true/>
+			<key>name</key>
+			<string>MST</string>
+			<key>regexFolderFilter</key>
+			<string>!.*/(\.[^/]*|CVS|_darcs|_MTN|\{arch\}|blib|.*~\.nib|.*\.(framework|app|pbproj|pbxproj|xcode(proj)?|bundle))$</string>
+			<key>sourceDirectory</key>
+			<string>MST</string>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>nets</string>
+			<key>regexFolderFilter</key>
+			<string>!.*/(\.[^/]*|CVS|_darcs|_MTN|\{arch\}|blib|.*~\.nib|.*\.(framework|app|pbproj|pbxproj|xcode(proj)?|bundle))$</string>
+			<key>sourceDirectory</key>
+			<string>nets</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>out.txt</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>rand.pl</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>README.textile</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>rename.pl</string>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>sandbox</string>
+			<key>regexFolderFilter</key>
+			<string>!.*/(\.[^/]*|CVS|_darcs|_MTN|\{arch\}|blib|.*~\.nib|.*\.(framework|app|pbproj|pbxproj|xcode(proj)?|bundle))$</string>
+			<key>sourceDirectory</key>
+			<string>sandbox</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>sandbox.pl</string>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>test</string>
+			<key>regexFolderFilter</key>
+			<string>!.*/(\.[^/]*|CVS|_darcs|_MTN|\{arch\}|blib|.*~\.nib|.*\.(framework|app|pbproj|pbxproj|xcode(proj)?|bundle))$</string>
+			<key>sourceDirectory</key>
+			<string>test</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>test.pl</string>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Utils</string>
+			<key>regexFolderFilter</key>
+			<string>!.*/(\.[^/]*|CVS|_darcs|_MTN|\{arch\}|blib|.*~\.nib|.*\.(framework|app|pbproj|pbxproj|xcode(proj)?|bundle))$</string>
+			<key>sourceDirectory</key>
+			<string>Utils</string>
+		</dict>
+		<dict>
+			<key>filename</key>
+			<string>wlfr.pl</string>
 		</dict>
 	</array>
 	<key>fileHierarchyDrawerWidth</key>
 	<integer>201</integer>
 	<key>metaData</key>
 	<dict>
-		<key>Community/Algorithms.pm</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>41</integer>
-				<key>line</key>
-				<integer>470</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>6</integer>
-		</dict>
 		<key>Community/Metrics.pm</key>
 		<dict>
 			<key>caret</key>
@@ -54,30 +160,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>43</integer>
+				<integer>1</integer>
 				<key>line</key>
-				<integer>135</integer>
+				<integer>82</integer>
 			</dict>
-			<key>columnSelection</key>
-			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>8</integer>
-			<key>selectFrom</key>
-			<dict>
-				<key>column</key>
-				<integer>19</integer>
-				<key>line</key>
-				<integer>135</integer>
-			</dict>
-			<key>selectTo</key>
-			<dict>
-				<key>column</key>
-				<integer>43</integer>
-				<key>line</key>
-				<integer>135</integer>
-			</dict>
+			<integer>56</integer>
 		</dict>
 		<key>Utils/Content.pm</key>
 		<dict>
@@ -87,6 +177,20 @@
 				<integer>0</integer>
 				<key>line</key>
 				<integer>36</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>Utils/GraphViz.pm</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>5</integer>
+				<key>line</key>
+				<integer>94</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
@@ -105,21 +209,21 @@
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>296</integer>
+			<integer>370</integer>
 		</dict>
-		<key>assignment.pl</key>
+		<key>Utils/Stability.pm</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>68</integer>
+				<integer>36</integer>
 				<key>line</key>
-				<integer>143</integer>
+				<integer>57</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>120</integer>
+			<integer>36</integer>
 		</dict>
 		<key>boids.pl</key>
 		<dict>
@@ -223,7 +327,7 @@
 			<key>firstVisibleLine</key>
 			<integer>3</integer>
 		</dict>
-		<key>out_dagrs_lose/karate_MNR.dat</key>
+		<key>out.txt</key>
 		<dict>
 			<key>caret</key>
 			<dict>
@@ -235,37 +339,7 @@
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>438</integer>
-		</dict>
-		<key>out_dagrs_lose/karate_P.dat</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>16</integer>
-				<key>line</key>
-				<integer>484</integer>
-			</dict>
-			<key>columnSelection</key>
-			<false/>
-			<key>firstVisibleColumn</key>
 			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>438</integer>
-			<key>selectFrom</key>
-			<dict>
-				<key>column</key>
-				<integer>7</integer>
-				<key>line</key>
-				<integer>335</integer>
-			</dict>
-			<key>selectTo</key>
-			<dict>
-				<key>column</key>
-				<integer>16</integer>
-				<key>line</key>
-				<integer>484</integer>
-			</dict>
 		</dict>
 		<key>rename.pl</key>
 		<dict>
@@ -282,52 +356,28 @@
 			<integer>0</integer>
 		</dict>
 	</dict>
-	<key>openDocuments</key>
-	<array>
-		<string>Community/Algorithms.pm</string>
-		<string>assignment.pl</string>
-		<string>boids.pl</string>
-		<string>Community/Metrics.pm</string>
-		<string>Utils/Read.pm</string>
-		<string>Community/Misc.pm</string>
-	</array>
 	<key>showFileHierarchyDrawer</key>
 	<false/>
 	<key>showFileHierarchyPanel</key>
 	<true/>
 	<key>treeState</key>
 	<dict>
-		<key>sharc</key>
+		<key>Community</key>
 		<dict>
 			<key>isExpanded</key>
 			<true/>
 			<key>subItems</key>
-			<dict>
-				<key>Community</key>
-				<dict>
-					<key>isExpanded</key>
-					<true/>
-					<key>subItems</key>
-					<dict/>
-				</dict>
-				<key>MST</key>
-				<dict>
-					<key>isExpanded</key>
-					<true/>
-					<key>subItems</key>
-					<dict/>
-				</dict>
-				<key>Utils</key>
-				<dict>
-					<key>isExpanded</key>
-					<true/>
-					<key>subItems</key>
-					<dict/>
-				</dict>
-			</dict>
+			<dict/>
+		</dict>
+		<key>MST</key>
+		<dict>
+			<key>isExpanded</key>
+			<true/>
+			<key>subItems</key>
+			<dict/>
 		</dict>
 	</dict>
 	<key>windowFrame</key>
-	<string>{{619, 72}, {821, 806}}</string>
+	<string>{{0, 72}, {1095, 1106}}</string>
 </dict>
 </plist>
