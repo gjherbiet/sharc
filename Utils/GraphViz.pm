@@ -87,7 +87,7 @@ sub graphviz_export {
             $attributes{width} = 0.1;
             $attributes{height} = 0.1;
         }
-        if ($G->has_vertex_attribute($n, "x") && $G->has_vertex_attribute($n, "x")) {
+        if ($G->has_vertex_attribute($n, "x") && $G->has_vertex_attribute($n, "y")) {
             my $x = $G->get_vertex_attribute($n, "x") / 10;
             my $y = $G->get_vertex_attribute($n, "y") / 10;
             $attributes{pos} = "$x,$y!";
