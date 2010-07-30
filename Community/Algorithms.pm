@@ -556,10 +556,218 @@ sub sharc {
         if ($period == 1 || ($node % $period) == ($parameters{step} % $period)) {
             #print "Performing ecdns for node $node, step is $parameters{step}.\n";
             #print "($node % $period) =".($node % $period)." ($parameters{step} % $period) =".($parameters{step} % $period).".\n";
-            sharc_node($G, $node, %parameters);
+            soft_sharc_node($G, $node, %parameters);
         }
     }
 }
+
+
+sub soft_sharc_node {
+    my $G = shift;
+    my $n = shift;
+    my %parameters = @_;
+    
+    # Has this node been updated
+    my $updated = 0;
+
+    # Current step
+    my $step = $parameters{step};
+    
+    # Break mode lifetime default value
+    my $broken_lifetime = 1;
+    $broken_lifetime = $parameters{broken_lifetime} if (exists($parameters{broken_lifetime}));
+    
+    # Current neighbors of this node
+    my @neighbors = $G->neighbours($n);
+    
+    # Previous neighbors of this node
+    my @prev_neighbors = ();
+    @prev_neighbors = @{$G->get_vertex_attribute($n, "prev_neighbors")}
+        if ($G->has_vertex_attribute($n, "prev_neighbors"));
+    
+    # Neighbors of my community that have dissapeared
+    my %diff, my @lost_neighbors;
+    @diff{ @prev_neighbors } = @prev_neighbors;
+    delete @diff{ @neighbors };
+    foreach my $k (keys %diff) {
+        push (@lost_neighbors, $k)
+            if (get_node_community($G, $n, %parameters) ==
+                get_node_community($G, $k, %parameters));
+    }
+    keys %diff;
+    
+    
+    #print "($step):".node_info($G, $n, %parameters)." PN = ".join(' ', sort {$a <=> $b} @prev_neighbors)."\n";
+    print "($step):".node_info($G, $n, %parameters)."  N = ".join(' ', sort {$a <=> $b} @neighbors)."\n";
+    
+    #
+    # A node without any neighbors reverts to being its own community
+    # not matter whether it is currently in break mode
+    #
+    if (scalar @neighbors == 0) {
+        set_node_community($G, $n, $n, %parameters);
+        print "($step):$n  C = $n\n";
+        $updated = 1;
+    }
+    
+    #
+    # If break mode is enabled, it shall continue if broken lifetime is
+    # not expired. Otherwise is shall be cleaned
+    #
+    if ($G->has_vertex_attribute($n, "broken_community") &&
+        $G->has_vertex_attribute($n, "broken_lifetime") &&
+        $G->get_vertex_attribute($n, "broken_lifetime") > 0 &&
+        !$updated) {
+        
+        my $bl = $G->get_vertex_attribute($n, "broken_lifetime");
+        $G->set_vertex_attribute($n, "broken_lifetime", ($bl -1));
+        print "($step):".node_info($G, $n, %parameters)." remains in break mode (".($G->get_vertex_attribute($n, "broken_lifetime"))." steps remaining).\n";
+        $updated = 1;
+    }
+    else {
+        $G->delete_vertex_attribute($n, "broken_community");
+        $G->delete_vertex_attribute($n, "broken_originator_distance");
+        $G->delete_vertex_attribute($n, "broken_lifetime");
+    }
+
+    #
+    # Search for a neighbor in break mode. If one is found, apply it
+    # TODO: maybe some additional conditions to apply neighbor break mode
+    # are required
+    #
+    foreach my $nb (@neighbors) {
+        #
+        # Neighbor break mode :
+        # I have a neighbor node in break that was in the same community I'm in,
+        # but at least as close as I am from the originator
+        # Test if I shall apply the break
+        #
+        if ($G->has_vertex_attribute($nb, "broken_community")
+            && $G->get_vertex_attribute($nb, "broken_community") == get_node_community($G, $n, %parameters)
+            && $G->get_vertex_attribute($nb, "broken_originator_distance") <= get_originator_distance($G, $n, %parameters)
+            && !$updated) {
+
+            if (_assume_new_community($G, $n, $step, %parameters)) {
+                $G->set_vertex_attribute($n, "broken_community",
+                    get_node_community($G, $n, %parameters));
+                $G->set_vertex_attribute($n, "broken_lifetime", $broken_lifetime);
+                $G->set_vertex_attribute($n, "broken_originator_distance", get_originator_distance($G, $n, %parameters));
+                set_node_community($G, $n, get_node_community($G, $nb, %parameters), %parameters);
+                print "($step):".node_info($G, $n, %parameters)." enters neighbor break mode for $broken_lifetime steps due to node ".node_info($G, $nb, %parameters)."\n";
+                $updated = 1;
+            }
+        }
+    }
+
+    #
+    # Some neighbors were lost, maybe break mode shall be enabled
+    #
+    if (!$updated && scalar @lost_neighbors > 0) {
+        #print "($step):$n<".get_node_community($G, $n, %parameters).">  L = ".join(' ', sort {$a <=> $b} @lost_neighbors)."\n";
+        
+        #
+        # First, shall be the farthest node from the originator for
+        # AT LEAST one of the breaks.
+        # Ties are broken based on node ids
+        # TODO: check if this shall not be FOR ALL breaks...
+        #
+        my $farthest = 0;
+        my $d_n = get_originator_distance($G, $n, %parameters);
+        
+        foreach my $l (@lost_neighbors) {
+            print "($step):".node_info($G, $n, %parameters)."  L = $l<".get_node_community($G, $n, %parameters).">\n";
+            my $d_l = get_originator_distance($G, $l, %parameters);
+            $farthest += (($d_n > $d_l) || ($d_n == $d_l && $n > $l));
+            print "($step):".node_info($G, $n, %parameters)." d($n) = $d_n, d($l) = $d_l\n";
+        }
+        
+        # The considered node is the farthest for at least one of the
+        # considered breaks, Makes the assumption about all neighbors currently in the same
+        # community and at least as far as him following him to a new community
+        if ($farthest && _assume_new_community($G, $n, $step, %parameters)) {
+            #
+            # Break mode
+            #
+            $G->set_vertex_attribute($n, "broken_community",
+                get_node_community($G, $n, %parameters));
+            $G->set_vertex_attribute($n, "broken_lifetime", $broken_lifetime);
+            $G->set_vertex_attribute($n, "broken_originator_distance", get_originator_distance($G, $n, %parameters));
+            set_node_community($G, $n, $n, %parameters);
+            print "($step):".node_info($G, $n, %parameters)." enters break mode for $broken_lifetime steps\n";
+            $updated = 1;
+        }
+    }
+    
+    #
+    # If all the other alternative were not executed
+    # simply perform the standard assignment
+    #
+    if (!$updated) {
+        ecdns_node($G, $n, %parameters);
+    }
+    
+    
+    #
+    # Set the distance to the originator
+    #
+    my $dist = 2**32;
+    if (get_node_community($G, $n, %parameters) == $n) {
+        $dist = 0;
+    }
+    else {
+        foreach my $nb (@neighbors) {
+            if ($G->has_vertex_attribute($nb, "originator_distance") &&
+                get_node_community($G, $n, %parameters) == get_node_community($G, $nb, %parameters) &&
+                get_originator_distance($G, $nb, %parameters) + 1 < $dist) {
+                $dist = get_originator_distance($G, $nb, %parameters) + 1;
+            }
+        }
+    }
+    set_originator_distance($G, $n, $dist, %parameters);
+    
+    
+    #
+    # Remember the neighborhood for next iteration
+    #
+    $G->set_vertex_attribute($n, "prev_neighbors", \@neighbors);
+}
+
+sub _assume_new_community {
+    my $G = shift;
+    my $n = shift;
+    my $step = shift;
+    my %parameters = @_;
+    
+    #
+    # Makes the assumption about all neighbors currently in the same
+    # community and at least as far as him following him to a new
+    # community
+    #
+    my $strength_new = 0;
+    my $strength_old = 0;
+    foreach my $nb (sort $G->neighbours($n)) {
+        if ($G->has_vertex_attribute($nb, "originator_distance") &&
+            get_node_community($G, $n, %parameters) == get_node_community($G, $nb, %parameters) &&
+            get_originator_distance($G, $nb, %parameters) < get_originator_distance($G, $n, %parameters)) {
+            print "($step):".node_info($G, $n, %parameters)." ".node_info($G, $nb, %parameters)." is in OLD community\n";
+            $strength_old += _neighborhood_similarity($G, $n, $nb);
+        }
+        elsif ($G->has_vertex_attribute($nb, "originator_distance") &&
+            get_node_community($G, $n, %parameters) == get_node_community($G, $nb, %parameters) &&
+            get_originator_distance($G, $nb, %parameters) >= get_originator_distance($G, $n, %parameters)) {
+            print "($step):".node_info($G, $n, %parameters)." ".node_info($G, $nb, %parameters)." is in NEW community\n";
+            $strength_new += _neighborhood_similarity($G, $n, $nb);
+        }
+    }
+    print "($step):$n NEW = $strength_new, OLD = $strength_old\n";
+    
+    #
+    # If the node would be strongly linked to the new supposed
+    # broken community, enter break mode
+    #
+    return ($strength_new > $strength_old);
+}
+
 
 sub sharc_node {
     my $G = shift;
