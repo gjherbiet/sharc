@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>currentDocument</key>
+	<string>Community/Algorithms.pm</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -11,6 +13,8 @@
 		<dict>
 			<key>filename</key>
 			<string>assignment.pl</string>
+			<key>lastUsed</key>
+			<date>2010-07-29T15:26:25Z</date>
 		</dict>
 		<dict>
 			<key>filename</key>
@@ -67,8 +71,6 @@
 			<string>log-cleaner.sh</string>
 		</dict>
 		<dict>
-			<key>expanded</key>
-			<true/>
 			<key>name</key>
 			<string>MST</string>
 			<key>regexFolderFilter</key>
@@ -87,6 +89,8 @@
 		<dict>
 			<key>filename</key>
 			<string>out.txt</string>
+			<key>lastUsed</key>
+			<date>2010-07-27T15:23:42Z</date>
 		</dict>
 		<dict>
 			<key>filename</key>
@@ -99,6 +103,8 @@
 		<dict>
 			<key>filename</key>
 			<string>rename.pl</string>
+			<key>lastUsed</key>
+			<date>2010-07-28T12:25:02Z</date>
 		</dict>
 		<dict>
 			<key>name</key>
@@ -111,6 +117,8 @@
 		<dict>
 			<key>filename</key>
 			<string>sandbox.pl</string>
+			<key>lastUsed</key>
+			<date>2010-07-30T08:24:44Z</date>
 		</dict>
 		<dict>
 			<key>name</key>
@@ -123,8 +131,12 @@
 		<dict>
 			<key>filename</key>
 			<string>test.pl</string>
+			<key>lastUsed</key>
+			<date>2010-07-30T08:24:43Z</date>
 		</dict>
 		<dict>
+			<key>expanded</key>
+			<true/>
 			<key>name</key>
 			<string>Utils</string>
 			<key>regexFolderFilter</key>
@@ -141,6 +153,20 @@
 	<integer>201</integer>
 	<key>metaData</key>
 	<dict>
+		<key>Community/Algorithms.pm</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>401</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>607</integer>
+		</dict>
 		<key>Community/Metrics.pm</key>
 		<dict>
 			<key>caret</key>
@@ -153,7 +179,7 @@
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>79</integer>
+			<integer>16</integer>
 		</dict>
 		<key>Community/Misc.pm</key>
 		<dict>
@@ -183,20 +209,6 @@
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
-		<key>Utils/GraphViz.pm</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>5</integer>
-				<key>line</key>
-				<integer>94</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
 		<key>Utils/Read.pm</key>
 		<dict>
 			<key>caret</key>
@@ -209,7 +221,7 @@
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>370</integer>
+			<integer>361</integer>
 		</dict>
 		<key>Utils/Stability.pm</key>
 		<dict>
@@ -224,6 +236,20 @@
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>36</integer>
+		</dict>
+		<key>assignment.pl</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>79</integer>
+				<key>line</key>
+				<integer>144</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>149</integer>
 		</dict>
 		<key>boids.pl</key>
 		<dict>
@@ -332,30 +358,20 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>122</integer>
 				<key>line</key>
-				<integer>0</integer>
+				<integer>5</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
-			<integer>0</integer>
+			<integer>74</integer>
 			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
-		<key>rename.pl</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>28</integer>
-				<key>line</key>
-				<integer>7</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
+			<integer>415</integer>
 		</dict>
 	</dict>
+	<key>openDocuments</key>
+	<array>
+		<string>Community/Algorithms.pm</string>
+	</array>
 	<key>showFileHierarchyDrawer</key>
 	<false/>
 	<key>showFileHierarchyPanel</key>
@@ -369,7 +385,7 @@
 			<key>subItems</key>
 			<dict/>
 		</dict>
-		<key>MST</key>
+		<key>Utils</key>
 		<dict>
 			<key>isExpanded</key>
 			<true/>
@@ -378,6 +394,6 @@
 		</dict>
 	</dict>
 	<key>windowFrame</key>
-	<string>{{0, 72}, {1095, 1106}}</string>
+	<string>{{0, 180}, {1095, 878}}</string>
 </dict>
 </plist>

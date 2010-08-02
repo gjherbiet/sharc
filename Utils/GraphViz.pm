@@ -53,9 +53,7 @@ sub graphviz_export {
     $outfile = $parameters{logfile} if(exists($parameters{logfile}));
     
     $name =~ s/-/_/g;
-    my $GV = GraphViz->new(directed => $G->is_directed(), layout => 'neato',
-        overlap => 'true', name => $name,
-        node => { style => 'filled', shape => 'circle',  height => '.75', width => '.75'});
+    my $GV;
     
     #
     # Compute the maximum community score over the nodes
@@ -73,11 +71,12 @@ sub graphviz_export {
     #
     foreach my $n ($G->vertices()) {
         my %attributes = %{$G->get_vertex_attributes($n)};
+        my $overlap = 'scale';
         
         if ($G->has_vertex_attribute($n, "community")) {
-            $attributes{shape} = 'box'
-                if ($G->get_vertex_attribute($n, "community") == $n);
-            $attributes{color} = join(',', _hsv_color_from_id($G, $G->get_vertex_attribute($n, "community")));
+            #$attributes{shape} = 'box'
+            #    if ($G->get_vertex_attribute($n, "community") == $n);
+            $attributes{color} = join(',', _hsv_color_from_uuid($G->get_vertex_attribute($n, "community")));
         }
         if ($G->has_vertex_attribute($n, "community_score") && $max_community_score > 0) {
             $attributes{width} = $G->get_vertex_attribute($n, "community_score") / $max_community_score;
@@ -91,8 +90,14 @@ sub graphviz_export {
             my $x = $G->get_vertex_attribute($n, "x") / 10;
             my $y = $G->get_vertex_attribute($n, "y") / 10;
             $attributes{pos} = "$x,$y!";
+            $overlap = 'true';
         }
         
+        unless ($GV) {
+            $GV = GraphViz->new(directed => $G->is_directed(), layout => 'neato',
+                overlap => $overlap, name => $name,
+                node => { style => 'filled', shape => 'circle',  height => '.75', width => '.75'});
+        }
         $GV->add_node($n, %attributes);
     }
     
@@ -143,4 +148,11 @@ sub _hsv_color_from_id {
     my $color = Color::Object->newRGB(hex($groups[$c%3]) / 255, hex($groups[(($c%3)+1)%3]) / 255, hex($groups[(($c%3)+2)%3]) / 255);
     my ($h, $s, $v) = $color->asHSV();
     return ($h / 360 , $s, $v);
+}
+
+sub _hsv_color_from_uuid {
+    my $uuid = shift;
+    
+    my @u = split('-', $uuid);
+    return (map { hex("0x".$_) / hex("0xFFFF") } @u[1,2,3]);
 }

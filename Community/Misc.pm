@@ -31,10 +31,12 @@ use warnings;
 use base 'Exporter';
 
 use List::Util 'shuffle';
+use UUID;
 
 our $VERSION = '0.1';
 our @EXPORT  = qw(  node_info
-                    get_node_community 
+                    get_node_community
+                    reset_node_community
                     set_node_community
                     is_bridge
                     get_originator_distance
@@ -74,12 +76,22 @@ sub get_node_community {
     my $community_field = exists($parameters{community_field}) ?
         $parameters{community_field} : "community";
     
-    if ($G->has_vertex_attribute($n, $community_field)) {
-        return $G->get_vertex_attribute($n, $community_field);
+    unless($G->has_vertex_attribute($n, $community_field)) {
+        reset_node_community($G, $n, %parameters);
     }
-    else {
-        return $n;
-    }
+    return $G->get_vertex_attribute($n, $community_field);
+}
+
+sub reset_node_community {
+    my $G = shift;
+    my $n = shift;
+    my %parameters = @_;
+    
+    my $uuid;
+    my $string;
+    UUID::generate($uuid);
+    UUID::unparse($uuid, $string);
+    set_node_community($G, $n, $string, %parameters);
 }
 
 sub set_node_community {

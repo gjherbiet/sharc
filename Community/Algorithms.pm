@@ -150,9 +150,9 @@ sub synchronous_asynchronous_node {
     #
     # Now search for the community with the highest score
     #
-    my $max_community   = $n;   # if no other community is heard, the node declares
-    my $max_score       = -1;   # itself its own community, but this is superseeded
-                                # by any other heard community
+    my $max_community   = get_node_community($G, $n, %parameters);  # if no other community is heard, the node declares
+    my $max_score       = -1;                                       # itself its own community, but this is superseeded
+                                                                    # by any other heard community
     foreach my $community (sort keys %score) {
         ($max_score, $max_community) = 
             _max_random_tie($score{$community}, $max_score, $community, $max_community);
@@ -164,8 +164,16 @@ sub synchronous_asynchronous_node {
         my $prev_community = get_node_community($G, $n, community_field => $community_field);
         set_node_community($G, $n, $prev_community, community_field => $prev_community_field);
     }
-    set_node_community($G, $n, $max_community, community_field => $community_field);
-    $G->set_vertex_attribute($n, $community_field."_score", $max_score);
+    #set_node_community($G, $n, $max_community, community_field => $community_field);
+    #$G->set_vertex_attribute($n, $community_field."_score", $max_score);
+    if ($max_score == -1) {
+        reset_node_community($G, $n, %parameters);
+        $G->set_vertex_attribute($n, $community_field."_score", 0);
+    }
+    else {
+        set_node_community($G, $n, $max_community, %parameters);
+        $G->set_vertex_attribute($n, $community_field."_score", $max_score);
+    }
 }
 #-----------------------------------------------------------------------------
 
@@ -324,7 +332,7 @@ sub leung_node {
     #
     # Now search for the community with the highest score
     #
-    my $max_community   = $n;   # if no other community is heard, the node declares
+    my $max_community   = get_node_community($G, $n, %parameters);   # if no other community is heard, the node declares
     my $max_score       = -1;   # itself its own community, but this is superseeded
                                 # by any other heard community
     foreach my $community (sort keys %score) {
@@ -364,8 +372,15 @@ sub leung_node {
     # Register the new values
     #
     $G->set_vertex_attribute($n, $label_score, $new_score);
-    set_node_community($G, $n, $max_community, community_field => $community_field);
+    #set_node_community($G, $n, $max_community, community_field => $community_field);
     $G->set_vertex_attribute($n, $community_field."_score", $new_score);
+    
+    if ($max_score == -1) {
+        reset_node_community($G, $n, %parameters);
+    }
+    else {
+        set_node_community($G, $n, $max_community, %parameters);
+    }
 }
 #-----------------------------------------------------------------------------
 
@@ -520,18 +535,23 @@ sub ecdns_node {
     #
     # Now search for the community with the highest score
     #
-    my $max_community   = $n;   # if no other community is heard, the node declares
-    my $max_score       = -1;   # itself its own community, but this is superseeded
-                                # by any other heard community
+    my $max_community   = get_node_community($G, $n, %parameters);  # if no other community is heard, the node declares
+    my $max_score       = -1;                                       # itself its own community, but this is superseeded
+                                                                    # by any other heard community
     foreach my $community (sort keys %score) {
         #print "<$n> $community = $score{$community}\n" if ($n == 6);
         ($max_score, $max_community) = 
             _max_degree_tie($score{$community}, $max_score, $community, $max_community, \%highest_degree);
             #_max_random_tie($score{$community}, $max_score, $community, $max_community);
     }
-    #print "$n: $max_community ($max_score).\n";
-    set_node_community($G, $n, $max_community, %parameters);
-    $G->set_vertex_attribute($n, $community_field."_score", $max_score / (scalar $G->neighbours($n)));
+    if ($max_score == -1) {
+        reset_node_community($G, $n, %parameters);
+        $G->set_vertex_attribute($n, $community_field."_score", 0);
+    }
+    else {
+        set_node_community($G, $n, $max_community, %parameters);
+        $G->set_vertex_attribute($n, $community_field."_score", $max_score / (scalar $G->neighbours($n)));
+    }
 }
 
 sub sharc {
@@ -595,7 +615,7 @@ sub sharc_node {
     # If the node has no neighbors, simply set myself back to self-community
     #
     if (scalar @neighbors == 0 && !$updated) {
-        set_node_community($G, $n, $n, %parameters);
+        reset_node_community($G, $n, %parameters);
         #print "($step) Node $n enters self-community.\n";
         $updated = 1;
     }

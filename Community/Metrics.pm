@@ -47,7 +47,7 @@ sub assignment {
     my %C = community_assignment($G, %parameters);
     
     my $str;
-    foreach my $c (sort {$a <=> $b} keys %C) {
+    foreach my $c (sort keys %C) {
         my @nodes = sort {$a <=> $b} (@{$C{$c}});
         $str .= $c.":[";
         foreach my $n (@nodes) {
@@ -78,7 +78,7 @@ sub distribution {
     # Create and add elements to the statistics element
     #
     my $stats = Statistics::Descriptive::Full->new();
-    foreach my $c (sort {$a <=> $b} keys %C) {
+    foreach my $c (sort keys %C) {
         $stats->add_data((scalar @{$C{$c}}));
     }
     
@@ -126,7 +126,7 @@ sub modularity {
             my $c_i = get_node_community($G, $n_i, %parameters);
             my $c_j = get_node_community($G, $n_j, %parameters);
             
-            if ($c_i == $c_j) {
+            if ($c_i eq $c_j) {
                 my $k_i;
                 my $k_j;
                 

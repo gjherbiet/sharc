@@ -95,21 +95,22 @@ sub _update_vertices {
         
         # Now update the style of the edges based on their assignment
         my $c = get_node_community($G, $n, %parameters);
-        $v->label("$n <$c>");
+        $v->label("$n");
         # my $mod = $c%3;
         #         my @c;
         #         $c[$mod] = sprintf("%02X", $c * (255 / (scalar $G->vertices)));
         #         $c[($mod+1)%3] = sprintf("%02X", int($c / 3) * (255 / (scalar $G->vertices) / 3));
         #         $c[($mod+2)%3] = sprintf("%02X", int($c / 9) * (255 / (scalar $G->vertices) / 9));
         #         my $col = join("", @c);
-        my $col = _hex_color_from_community($G, $c);
+        #my $col = _hex_color_from_community($G, $c);
+        my $col = _hex_color_from_uuid($c);
         $v->color("#".$col);
-        if ($n == $c) {
-            $v->shape("cube");
-        }
-        else {
+        #if ($n == $c) {
+        #    $v->shape("cube");
+        #}
+        #else {
             $v->shape("sphere");
-        }
+        #}
         if ($G->has_vertex_attribute($n, "community_score") &&
             $G->get_vertex_attribute($n, "community_score") > $max_community_score) {
             $max_community_score = $G->get_vertex_attribute($n, "community_score");
@@ -118,9 +119,13 @@ sub _update_vertices {
     
     foreach my $n ($G->vertices) {
         my $v = $G->get_vertex_attribute($n, "ubigraph_vertex");
-        if ($G->has_vertex_attribute($n, "community_score")) {
+        if ($G->has_vertex_attribute($n, "community_score") &&
+            $G->has_vertex_attribute($n, "community_score") != 0) {
             $v->size(2*$G->get_vertex_attribute($n, "community_score") / $max_community_score);
             #print "$n: size=".(2*$G->get_vertex_attribute($n, "community_score") / $max_community_score)."\n";
+        }
+        else {
+            $v->size(1);
         }
     }
     
@@ -170,7 +175,7 @@ sub _update_edges {
             my $dist = sqrt( $xx**2 + $yy**2 );
             $e->strength(25/$dist);
         }
-        elsif (get_node_community($G, $u, %parameters) == get_node_community($G, $v, %parameters)) {
+        elsif (get_node_community($G, $u, %parameters) eq get_node_community($G, $v, %parameters)) {
             $e->strength(0.8);
         }
         else {
@@ -190,3 +195,9 @@ sub _hex_color_from_community {
     return $groups[$c%3].$groups[(($c%3)+1)%3].$groups[(($c%3)+2)%3];
 }
 
+sub _hex_color_from_uuid {
+    my $uuid = shift;
+    
+    my @u = split('-', $uuid);
+    return join("", map {substr($_, 1, 2)} @u[1,2,3] );
+}
